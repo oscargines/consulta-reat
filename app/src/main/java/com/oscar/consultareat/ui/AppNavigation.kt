@@ -105,7 +105,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
 
     LaunchedEffect(uiState) {
         Log.d(TAG, "uiState cambiado: ${uiState::class.simpleName}, pantallaActual=$pantallaActual")
-        if (uiState is UiState.Success && pantallaActual != RUTA_CONSULTAS) {
+        if (uiState is UiState.Success && pantallaActual == RUTA_INICIO) {
             Log.d(TAG, "Navegando a consultas")
             navController.navigate(RUTA_CONSULTAS) { launchSingleTop = true }
         }
