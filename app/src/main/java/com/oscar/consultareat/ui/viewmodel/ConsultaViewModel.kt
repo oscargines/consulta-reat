@@ -35,6 +35,9 @@ class ConsultaViewModel(
     private val _avisoDuplicado = MutableStateFlow<String?>(null)
     val avisoDuplicado: StateFlow<String?> = _avisoDuplicado.asStateFlow()
 
+    private val _avisoSinResultados = MutableStateFlow<String?>(null)
+    val avisoSinResultados: StateFlow<String?> = _avisoSinResultados.asStateFlow()
+
     private var ultimaConsulta: ConsultaRequest? = null
 
     val historial = repository.getHistorial()
@@ -54,7 +57,12 @@ class ConsultaViewModel(
                             is ParsedResult.Success -> {
                                 Log.d(TAG, "Success detalle: identidad=[${parsed.identidadLabel}]='${parsed.identidadValor}', autorizaciones=${parsed.autorizaciones.size}, vehiculos=${parsed.vehiculos.size}, competencia=${parsed.competenciaProfesional.size}, consejero=${parsed.consejeroSeguridad.size}, cap=${parsed.capConductor.size}, operadores=${parsed.operadores.size}, datasets=${parsed.conjuntosDatos.size}")
                                 val enriquecido = enriquecerSiAplica(parsed)
-                                _uiState.value = UiState.Success(enriquecido.toConsultaResultado())
+                                if (enriquecido.avisoSinResultados != null) {
+                                    _uiState.value = UiState.Idle
+                                    _avisoSinResultados.value = enriquecido.avisoSinResultados
+                                } else {
+                                    _uiState.value = UiState.Success(enriquecido.toConsultaResultado())
+                                }
                                 guardarYAvisar(request, enriquecido)
                             }
                             is ParsedResult.Error -> {
@@ -90,7 +98,12 @@ class ConsultaViewModel(
                     is ParsedResult.Success -> {
                         Log.d(TAG, "Success detalle: identidad=[${parsed.identidadLabel}]='${parsed.identidadValor}', autorizaciones=${parsed.autorizaciones.size}, vehiculos=${parsed.vehiculos.size}, competencia=${parsed.competenciaProfesional.size}, consejero=${parsed.consejeroSeguridad.size}, cap=${parsed.capConductor.size}, operadores=${parsed.operadores.size}, datasets=${parsed.conjuntosDatos.size}")
                         val enriquecido = enriquecerSiAplica(parsed)
-                        _uiState.value = UiState.Success(enriquecido.toConsultaResultado())
+                        if (enriquecido.avisoSinResultados != null) {
+                            _uiState.value = UiState.Idle
+                            _avisoSinResultados.value = enriquecido.avisoSinResultados
+                        } else {
+                            _uiState.value = UiState.Success(enriquecido.toConsultaResultado())
+                        }
                         ultimaConsulta?.let { request ->
                             guardarYAvisar(request, enriquecido)
                         }
@@ -132,6 +145,10 @@ class ConsultaViewModel(
 
     fun avisoDuplicadoConsumido() {
         _avisoDuplicado.value = null
+    }
+
+    fun avisoSinResultadosConsumido() {
+        _avisoSinResultados.value = null
     }
 
     private suspend fun guardarYAvisar(request: ConsultaRequest, parsed: ParsedResult.Success) {

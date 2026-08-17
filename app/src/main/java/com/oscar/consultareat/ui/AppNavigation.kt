@@ -92,6 +92,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     val uiState by viewModel.uiState.collectAsState()
     val historial by viewModel.historial.collectAsState(initial = emptyList())
     val avisoDuplicado by viewModel.avisoDuplicado.collectAsState()
+    val avisoSinResultados by viewModel.avisoSinResultados.collectAsState()
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val pantallaActual = backStackEntry?.destination?.route
@@ -184,6 +185,18 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             text = { Text(mensaje) },
             confirmButton = {
                 TextButton(onClick = { viewModel.avisoDuplicadoConsumido() }) {
+                    Text("Aceptar")
+                }
+            }
+        )
+    }
+avisoSinResultados?.let { mensaje ->
+        AlertDialog(
+            onDismissRequest = { viewModel.avisoSinResultadosConsumido() },
+            title = { Text("Sin resultados") },
+            text = { Text(mensaje) },
+            confirmButton = {
+                TextButton(onClick = { viewModel.avisoSinResultadosConsumido() }) {
                     Text("Aceptar")
                 }
             }

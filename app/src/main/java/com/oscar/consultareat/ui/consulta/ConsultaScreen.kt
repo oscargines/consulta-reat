@@ -1,6 +1,8 @@
 package com.oscar.consultareat.ui.consulta
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.util.Log
 import android.webkit.WebChromeClient
@@ -8,6 +10,8 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -28,6 +32,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,6 +40,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -54,6 +60,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import com.oscar.consultareat.data.client.RgtClient
@@ -115,7 +122,11 @@ private fun esFormularioEnRespuesta(html: String): Boolean {
         html.contains("name=\"tpsolic\"") ||
         html.contains("name='tpsolic'")
     val tieneResultado = html.contains("fichaIdentidad") ||
-        html.contains("No se han encontrado resultados")
+        html.contains("No se han encontrado resultados") ||
+        html.contains("no tiene títulos habilitantes") ||
+        html.contains("no tiene titulos habilitantes") ||
+        html.contains("no constan datos") ||
+        html.contains("sin datos")
     return tieneFormulario && !tieneResultado
 }
 
@@ -194,14 +205,23 @@ private fun ConsultaForm(
     var tipoIdentificacion by remember { mutableStateOf(TipoIdentificacion.NIF) }
     var valor by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
+    var mostrarScanner by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
-    ) {
+    val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        if (concedido) mostrarScanner = true
+    }
+
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 20.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
         Text(
             text = "Consulta pública",
             style = MaterialTheme.typography.headlineMedium,
@@ -295,6 +315,26 @@ private fun ConsultaForm(
                     singleLine = true,
                     textStyle = MaterialTheme.typography.bodyLarge,
                     shape = RoundedCornerShape(14.dp),
+                    trailingIcon = {
+                        if (tipoIdentificacion == TipoIdentificacion.MATRICULA) {
+                            IconButton(onClick = {
+                                val permiso = Manifest.permission.CAMERA
+                                if (ContextCompat.checkSelfPermission(context, permiso) ==
+                                    PackageManager.PERMISSION_GRANTED
+                                ) {
+                                    mostrarScanner = true
+                                } else {
+                                    permissionLauncher.launch(permiso)
+                                }
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Filled.PhotoCamera,
+                                    contentDescription = "Capturar matrícula con la cámara",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                            }
+                        }
+                    },
                     keyboardOptions = KeyboardOptions(
                         capitalization = KeyboardCapitalization.Characters,
                         keyboardType = if (tipoIdentificacion == TipoIdentificacion.NIF) {
@@ -349,6 +389,19 @@ private fun ConsultaForm(
         }
 
         Spacer(modifier = Modifier.height(8.dp))
+        }
+
+        if (mostrarScanner) {
+            CapturaMatriculaScreen(
+                onMatricula = { matricula ->
+                    valor = matricula
+                    error = null
+                    mostrarScanner = false
+                },
+                onCancelar = { mostrarScanner = false },
+                modifier = Modifier.fillMaxSize()
+            )
+        }
     }
 }
 
@@ -427,23 +480,31 @@ private fun CaptchaWebView(
 
                         override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
                             isLoading = true
+                            Log.d(TAG, "onPageStarted: $url")
                         }
 
                         override fun onPageFinished(view: WebView, url: String?) {
                             isLoading = false
+                            Log.d(TAG, "onPageFinished: $url")
                             url?.let { u ->
                                 if (u.contains("ServletController") && !u.contains("accion=inicio")) {
                                     coroutineScope.launch {
                                         delay(1500)
+                                        view.evaluateJavascript(diagnosticoJs()) { diag ->
+                                            Log.d(TAG, "DIAG resultado: $diag")
+                                        }
                                         if (!handled) {
                                             handled = true
                                             view.evaluateJavascript(
                                                 "javascript:document.documentElement.outerHTML;"
                                             ) { html ->
                                                 val decoded = decodificarHtml(html)
+                                                Log.d(TAG, "HTML resultado: len=${decoded?.length}, form=${decoded?.contains("consultaForm")}, tpsolic=${decoded?.contains("tpsolic")}, ficha=${decoded?.contains("fichaIdentidad")}, noResultados=${decoded?.contains("No se han encontrado resultados")}, noTitulos=${decoded?.contains("títulos habilitantes")}")
                                                 if (!decoded.isNullOrEmpty() && !esFormularioEnRespuesta(decoded)) {
+                                                    Log.d(TAG, "HTML resultado es resultado real, extrayendo")
                                                     onResultadoHtmlObtenido(decoded, request.tipoConsulta)
                                                 } else {
+                                                    Log.d(TAG, "HTML resultado sigue siendo formulario, ignorando")
                                                     handled = false
                                                 }
                                             }
@@ -465,16 +526,19 @@ private fun CaptchaWebView(
                                             "if(inp){inp.value='"+escapeJs(request.valor)+"';}" +
                                             "})();"
                                     ) { }
+                                    view.evaluateJavascript(diagnosticoJs()) { diag ->
+                                        Log.d(TAG, "DIAG inicio: $diag")
+                                    }
                                     coroutineScope.launch {
-                                        for (intento in 1..6) {
+                                        Log.d(TAG, "Auto-submit: iniciando bucle")
+                                        for (intento in 1..20) {
                                             delay(1000L)
                                             if (handled) return@launch
-                                            when (consultarSiNoPideCaptcha(view)) {
-                                                "SUBMIT" -> return@launch
-                                                "CAPTCHA" -> return@launch
-                                                else -> Unit
-                                            }
+                                            val estado = enviarFormulario(view)
+                                            Log.d(TAG, "Auto-submit intento $intento -> $estado")
+                                            if (estado == "CAPTCHA") return@launch
                                         }
+                                        Log.d(TAG, "Auto-submit: 20 intentos sin navegación, página sigue en formulario")
                                     }
                                 }
                             }
@@ -522,19 +586,48 @@ private fun accion(request: ConsultaRequest): String = when (request.tipoIdentif
 private fun escapeJs(s: String): String =
     s.replace("\\", "\\\\").replace("'", "\\'").replace("\"", "\\\"").replace("\n", "\\n")
 
-private suspend fun consultarSiNoPideCaptcha(view: WebView): String =
+private suspend fun enviarFormulario(view: WebView): String =
     suspendCancellableCoroutine { cont ->
         view.evaluateJavascript(
             "javascript:(function(){" +
                 "var f=document.getElementById('consultaForm');" +
-                "if(!f){return 'NOFORM';}" +
-                "var cap=document.querySelector('#g-recaptcha-response');" +
-                "if(cap&&!cap.value){return 'CAPTCHA';}" +
-                "f.submit();" +
-                "return 'SUBMIT';" +
+                "if(!f){return Promise.resolve('NOFORM');}" +
+                "var v2=document.getElementById('g-recaptcha')" +
+                "||document.querySelector('.g-recaptcha')" +
+                "||document.querySelector('iframe[src*=\"recaptcha\"]');" +
+                "if(v2){return Promise.resolve('CAPTCHA');}" +
+                "var btn=document.querySelector('input[name=btnOk],button[name=btnOk]');" +
+                "function clickOrSubmit(){" +
+                "if(btn){btn.click();return 'SUBMIT';}" +
+                "f.submit();return 'SUBMIT';" +
+                "}" +
+                "var g=window.grecaptcha;" +
+                "if(g&&g.enterprise&&typeof g.enterprise.execute==='function'){" +
+                "return g.enterprise.execute('6Lc9-JUsAAAAAH_d0YPX0-qaWU8bcR2-uatHtsg4',{action:'submit'})" +
+                ".then(function(token){" +
+                "var cap=document.querySelector('#g-recaptcha-response,[name=\"g-recaptcha-response\"]');" +
+                "if(cap){cap.value=token;}" +
+                "return clickOrSubmit();" +
+                "}).catch(function(e){return clickOrSubmit();});" +
+                "}" +
+                "return Promise.resolve(clickOrSubmit());" +
                 "})();"
         ) { res -> cont.resume(res?.trim('"') ?: "NOFORM") }
     }
+
+private fun diagnosticoJs(): String =
+    "javascript:JSON.stringify({" +
+        "url:location.href," +
+        "ready:document.readyState," +
+        "form:!!document.getElementById('consultaForm')," +
+        "tpsolic:(document.querySelector('[name=tpsolic]:checked')||{}).value||''," +
+        "accion:(document.querySelector('[name=accion]:checked')||{}).value||''," +
+        "consulta:(document.querySelector('input[name=consulta],input[id*=consulta]')||{}).value||''," +
+        "btn:!!document.querySelector('input[name=btnOk],button[name=btnOk]')," +
+        "grecaptcha:typeof window.grecaptcha," +
+        "enterprise:!!(window.grecaptcha&&window.grecaptcha.enterprise)," +
+        "v2:!!document.getElementById('g-recaptcha')||!!document.querySelector('.g-recaptcha')||!!document.querySelector('iframe[src*=\"recaptcha\"]')" +
+        "})"
 
 private fun decodificarHtml(resultadoJs: String?): String? {
     if (resultadoJs.isNullOrBlank()) return null

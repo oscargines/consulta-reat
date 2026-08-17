@@ -11,8 +11,17 @@ class RgtHtmlParser {
     fun parse(html: String, tipoConsulta: TipoConsulta): ParsedResult {
         val doc = Jsoup.parse(html)
 
-        if (doc.body().text().contains("No se han encontrado resultados")) {
-            return ParsedResult.Error("No se han encontrado resultados para esta consulta")
+        extraerAvisoSinResultados(doc)?.let { aviso ->
+            return ParsedResult.Success(
+                identidadLabel = null,
+                identidadValor = null,
+                autorizaciones = emptyList(),
+                vehiculos = emptyList(),
+                competenciaProfesional = emptyList(),
+                consejeroSeguridad = emptyList(),
+                capConductor = emptyList(),
+                avisoSinResultados = aviso
+            )
         }
 
         val secciones = mutableMapOf<String, MutableList<DatoItem>>()
@@ -103,6 +112,34 @@ class RgtHtmlParser {
             titulo.contains("cualificación") || titulo.contains("cualificacion") -> "cap"
         else -> null
     }
+
+    private fun extraerAvisoSinResultados(doc: Document): String? {
+        val texto = doc.body().text()
+        for (r in regexSinResultados) {
+            val m = r.find(texto) ?: continue
+            val inicio = texto.lastIndexOf('.', m.range.first)
+            val inicioReal = if (inicio < 0) 0 else inicio + 1
+            val fin = texto.indexOf('.', m.range.last)
+            val finReal = if (fin < 0) texto.length else fin + 1
+            val frase = texto.substring(inicioReal, finReal).trim()
+            if (frase.isNotBlank()) return frase
+        }
+        return null
+    }
+
+    private companion object {
+        val regexSinResultados = listOf(
+            Regex("no se han encontrado resultados", RegexOption.IGNORE_CASE),
+            Regex("no tiene títulos habilitantes", RegexOption.IGNORE_CASE),
+            Regex("no tiene titulos habilitantes", RegexOption.IGNORE_CASE),
+            Regex("no dispone de ningún", RegexOption.IGNORE_CASE),
+            Regex("no dispone de ningun", RegexOption.IGNORE_CASE),
+            Regex("no se ha encontrado", RegexOption.IGNORE_CASE),
+            Regex("no existen datos", RegexOption.IGNORE_CASE),
+            Regex("no constan datos", RegexOption.IGNORE_CASE),
+            Regex("sin datos", RegexOption.IGNORE_CASE)
+        )
+    }
 }
 
 sealed interface ParsedResult {
@@ -115,7 +152,8 @@ sealed interface ParsedResult {
         val consejeroSeguridad: List<DatoItem> = emptyList(),
         val capConductor: List<DatoItem> = emptyList(),
         val operadores: List<DatoItem> = emptyList(),
-        val conjuntosDatos: List<DatoItem> = emptyList()
+        val conjuntosDatos: List<DatoItem> = emptyList(),
+        val avisoSinResultados: String? = null
     ) : ParsedResult
 
     data class Error(val mensaje: String) : ParsedResult

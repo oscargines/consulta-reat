@@ -10,7 +10,25 @@ class RgtHtmlParserTest {
     private val parser = RgtHtmlParser()
 
     @Test
-    fun `parse devuelve Error cuando HTML contiene mensaje de sin resultados`() {
+    fun `parse devuelve Success con aviso cuando HTML contiene mensaje de sin resultados`() {
+        val html = """
+            <html><body>
+                <div class="container_generico">
+                    <p>La matrícula consultada no tiene títulos habilitantes en vigor</p>
+                </div>
+            </body></html>
+        """.trimIndent()
+
+        val result = parser.parse(html, TipoConsulta.AUTORIZACIONES)
+        assert(result is ParsedResult.Success)
+        val success = result as ParsedResult.Success
+        assert(success.avisoSinResultados != null)
+        assert(success.avisoSinResultados!!.contains("títulos habilitantes"))
+        assert(success.autorizaciones.isEmpty())
+    }
+
+    @Test
+    fun `parse devuelve Success con aviso para mensaje clasico de sin resultados`() {
         val html = """
             <html><body>
                 <div class="container_generico">
@@ -20,8 +38,10 @@ class RgtHtmlParserTest {
         """.trimIndent()
 
         val result = parser.parse(html, TipoConsulta.AUTORIZACIONES)
-        assert(result is ParsedResult.Error)
-        assert((result as ParsedResult.Error).mensaje.contains("resultados"))
+        assert(result is ParsedResult.Success)
+        val success = result as ParsedResult.Success
+        assert(success.avisoSinResultados != null)
+        assert(success.avisoSinResultados!!.contains("resultados"))
     }
 
     @Test

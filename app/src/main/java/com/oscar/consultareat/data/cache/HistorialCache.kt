@@ -112,6 +112,7 @@ class HistorialCache(private val context: Context) {
         put("operadores", datosToJson(r.operadores))
         put("conjuntosDatos", datosToJson(r.conjuntosDatos))
         r.error?.let { put("error", it) }
+        r.avisoSinResultados?.let { put("avisoSinResultados", it) }
     }
 
     private fun jsonToResultado(json: JSONObject): ConsultaResultado = ConsultaResultado(
@@ -124,7 +125,8 @@ class HistorialCache(private val context: Context) {
         capConductor = jsonToDatos(json.optJSONArray("capConductor")),
         operadores = jsonToDatos(json.optJSONArray("operadores")),
         conjuntosDatos = jsonToDatos(json.optJSONArray("conjuntosDatos")),
-        error = json.optString("error").takeIf { it.isNotEmpty() }
+        error = json.optString("error").takeIf { it.isNotEmpty() },
+        avisoSinResultados = json.optString("avisoSinResultados").takeIf { it.isNotEmpty() }
     )
 
     private fun datosToJson(items: List<DatoItem>): JSONArray = JSONArray(

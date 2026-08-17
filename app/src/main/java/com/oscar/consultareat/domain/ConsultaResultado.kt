@@ -12,7 +12,8 @@ data class ConsultaResultado(
     val capConductor: List<DatoItem> = emptyList(),
     val operadores: List<DatoItem> = emptyList(),
     val conjuntosDatos: List<DatoItem> = emptyList(),
-    val error: String? = null
+    val error: String? = null,
+    val avisoSinResultados: String? = null
 )
 
 data class DatoItem(
@@ -29,5 +30,6 @@ fun ParsedResult.Success.toConsultaResultado(): ConsultaResultado = ConsultaResu
     consejeroSeguridad = consejeroSeguridad,
     capConductor = capConductor,
     operadores = operadores,
-    conjuntosDatos = conjuntosDatos
+    conjuntosDatos = conjuntosDatos,
+    avisoSinResultados = avisoSinResultados
 )
