@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Consulta REAT</string>
+    <string name="label_consulta">Introduzca el dato a consultar</string>
+    <string name="label_tipo_consulta">Tipo de consulta</string>
+    <string name="label_tipo_identificacion">Tipo de identificación</string>
+    <string name="action_consultar">Consultar</string>
+    <string name="estado_vacio">No se han encontrado resultados para esta consulta</string>
+    <string name="error_red">Error de conexión. Comprueba tu conexión e inténtalo de nuevo.</string>
+    <string name="accion_reintentar">Reintentar</string>
+    <string name="titulo_historial">Historial</string>
+    <string name="titulo_resultado">Resultado</string>
+    <string name="titulo_consulta">Consulta</string>
+    <string name="badge_vigente">Vigente</string>
+    <string name="badge_caducado">Caducado</string>
+    <string name="toast_guardado_historial">Consulta guardada en el historial</string>
+
+    <string name="api_nap_base_url" translatable="false">https://nap.transportes.gob.es</string>
+    <string name="api_nap_user_agent" translatable="false">ConsultaREAT Android App - contacto@oscar.com</string>
+</resources>

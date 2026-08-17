@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.ConsultaREAT" parent="Theme.Material3.DayNight.NoActionBar" />
+
+    <style name="Theme.ConsultaREAT.Splash" parent="Theme.ConsultaREAT">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+    </style>
+
+</resources>
