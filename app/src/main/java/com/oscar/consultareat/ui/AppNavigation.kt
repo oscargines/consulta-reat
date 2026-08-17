@@ -30,6 +30,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -38,7 +39,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -96,6 +99,9 @@ fun AppNavigation(modifier: Modifier = Modifier) {
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val pantallaActual = backStackEntry?.destination?.route
+
+    var mostrarComentario by remember { mutableStateOf(false) }
+    var textoComentario by remember { mutableStateOf("") }
 
     LaunchedEffect(uiState) {
         Log.d(TAG, "uiState cambiado: ${uiState::class.simpleName}, pantallaActual=$pantallaActual")
@@ -196,8 +202,59 @@ avisoSinResultados?.let { mensaje ->
             title = { Text("Sin resultados") },
             text = { Text(mensaje) },
             confirmButton = {
+                TextButton(onClick = {
+                    viewModel.avisoSinResultadosConsumido()
+                    mostrarComentario = true
+                }) {
+                    Text("Añadir comentario")
+                }
+            },
+            dismissButton = {
                 TextButton(onClick = { viewModel.avisoSinResultadosConsumido() }) {
                     Text("Aceptar")
+                }
+            }
+        )
+    }
+
+    if (mostrarComentario) {
+        AlertDialog(
+            onDismissRequest = {
+                mostrarComentario = false
+                textoComentario = ""
+            },
+            title = { Text("Comentario de la búsqueda") },
+            text = {
+                Column {
+                    Text(
+                        "Añade un comentario sobre esta búsqueda sin resultados (motivo, marca y modelo, empresa, actividad que realiza, etc.)."
+                    )
+                    Spacer(Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = textoComentario,
+                        onValueChange = { textoComentario = it },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 4,
+                        maxLines = 8,
+                        placeholder = { Text("Escribe aquí tu comentario…") }
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.guardarComentario(textoComentario)
+                    mostrarComentario = false
+                    textoComentario = ""
+                }) {
+                    Text("Guardar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    mostrarComentario = false
+                    textoComentario = ""
+                }) {
+                    Text("Cancelar")
                 }
             }
         )

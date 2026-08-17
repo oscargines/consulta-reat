@@ -59,6 +59,20 @@ class HistorialCache(private val context: Context) {
         }
     }
 
+    suspend fun actualizarComentario(id: String, comentario: String) {
+        context.historialDataStore.edit { prefs ->
+            val items = leerItems(prefs[Keys.ITEMS])
+            val updated = items.map { item ->
+                if (item.id == id) {
+                    item.copy(resultado = item.resultado.copy(comentario = comentario))
+                } else {
+                    item
+                }
+            }
+            prefs[Keys.ITEMS] = JSONArray(updated.map { itemToJson(it) }).toString()
+        }
+    }
+
     suspend fun clearAll() {
         context.historialDataStore.edit { it.clear() }
     }
@@ -113,6 +127,7 @@ class HistorialCache(private val context: Context) {
         put("conjuntosDatos", datosToJson(r.conjuntosDatos))
         r.error?.let { put("error", it) }
         r.avisoSinResultados?.let { put("avisoSinResultados", it) }
+        r.comentario?.let { put("comentario", it) }
     }
 
     private fun jsonToResultado(json: JSONObject): ConsultaResultado = ConsultaResultado(
@@ -126,7 +141,8 @@ class HistorialCache(private val context: Context) {
         operadores = jsonToDatos(json.optJSONArray("operadores")),
         conjuntosDatos = jsonToDatos(json.optJSONArray("conjuntosDatos")),
         error = json.optString("error").takeIf { it.isNotEmpty() },
-        avisoSinResultados = json.optString("avisoSinResultados").takeIf { it.isNotEmpty() }
+        avisoSinResultados = json.optString("avisoSinResultados").takeIf { it.isNotEmpty() },
+        comentario = json.optString("comentario").takeIf { it.isNotEmpty() }
     )
 
     private fun datosToJson(items: List<DatoItem>): JSONArray = JSONArray(

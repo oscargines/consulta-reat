@@ -13,7 +13,8 @@ data class ConsultaResultado(
     val operadores: List<DatoItem> = emptyList(),
     val conjuntosDatos: List<DatoItem> = emptyList(),
     val error: String? = null,
-    val avisoSinResultados: String? = null
+    val avisoSinResultados: String? = null,
+    val comentario: String? = null
 )
 
 data class DatoItem(

@@ -218,6 +218,34 @@ fun ResultadoContent(resultado: ConsultaResultado) {
                 modifier = Modifier.align(Alignment.CenterHorizontally)
             )
         }
+
+        resultado.comentario?.takeIf { it.isNotBlank() }?.let { comentario ->
+            TarjetaComentario(comentario)
+        }
+    }
+}
+
+@Composable
+private fun TarjetaComentario(comentario: String) {
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "Comentario de la búsqueda",
+                style = MaterialTheme.typography.labelSmall,
+                color = TextoSecundario
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = comentario,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 

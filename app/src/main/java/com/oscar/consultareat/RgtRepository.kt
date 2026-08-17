@@ -17,7 +17,7 @@ import kotlinx.coroutines.flow.first
 import java.util.UUID
 
 sealed interface GuardadoResultado {
-    data object Guardado : GuardadoResultado
+    data class Guardado(val item: HistorialItem) : GuardadoResultado
     data class Duplicado(val existente: HistorialItem) : GuardadoResultado
 }
 
@@ -45,16 +45,17 @@ class RgtRepository(
             Log.d(TAG, "Consulta duplicada en historial: ${request.valor}")
             return GuardadoResultado.Duplicado(existente)
         }
-        cache.addItem(HistorialItem(
+        val item = HistorialItem(
             id = UUID.randomUUID().toString(),
             tipoConsulta = request.tipoConsulta,
             tipoIdentificacion = request.tipoIdentificacion,
             valor = request.valor,
             obtenidoAt = System.currentTimeMillis(),
             resultado = parsed.toConsultaResultado()
-        ))
+        )
+        cache.addItem(item)
         Log.d(TAG, "Consulta guardada en historial: ${request.valor}")
-        return GuardadoResultado.Guardado
+        return GuardadoResultado.Guardado(item)
     }
 
     suspend fun consultarNap(nombre: String): ParsedResult.Success? {
@@ -76,6 +77,10 @@ class RgtRepository(
 
     suspend fun eliminarHistorial(id: String) {
         cache.deleteItem(id)
+    }
+
+    suspend fun actualizarComentario(id: String, comentario: String) {
+        cache.actualizarComentario(id, comentario)
     }
 
     suspend fun purgarExpirados(): Int = cache.purgarExpirados()

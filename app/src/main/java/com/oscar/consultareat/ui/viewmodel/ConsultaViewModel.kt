@@ -39,6 +39,7 @@ class ConsultaViewModel(
     val avisoSinResultados: StateFlow<String?> = _avisoSinResultados.asStateFlow()
 
     private var ultimaConsulta: ConsultaRequest? = null
+    private var itemActualId: String? = null
 
     val historial = repository.getHistorial()
 
@@ -152,13 +153,27 @@ class ConsultaViewModel(
     }
 
     private suspend fun guardarYAvisar(request: ConsultaRequest, parsed: ParsedResult.Success) {
-        when (repository.guardarResultado(request, parsed)) {
-            is GuardadoResultado.Guardado -> Unit
+        when (val resultado = repository.guardarResultado(request, parsed)) {
+            is GuardadoResultado.Guardado -> {
+                itemActualId = resultado.item.id
+            }
             is GuardadoResultado.Duplicado -> {
+                itemActualId = resultado.existente.id
                 _avisoDuplicado.value =
                     "La consulta \"${request.valor}\" ya existe en el historial y no se añadirá de nuevo."
             }
         }
+    }
+
+    fun guardarComentario(comentario: String) {
+        val id = itemActualId ?: return
+        val texto = comentario.trim()
+        if (texto.isEmpty()) return
+        Log.d(TAG, "Guardando comentario en historial item $id")
+        viewModelScope.launch {
+            repository.actualizarComentario(id, texto)
+        }
+        itemActualId = null
     }
 
     private suspend fun enriquecerSiAplica(parsed: ParsedResult.Success): ParsedResult.Success {
