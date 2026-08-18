@@ -14,6 +14,24 @@
     <string name="badge_caducado">Caducado</string>
     <string name="toast_guardado_historial">Consulta guardada en el historial</string>
 
+    <string name="titulo_excepciones">Consulta excepciones</string>
+    <string name="subtitulo_excepciones">Excepciones a la obligación de título habilitante (Art. 33 ROTC)</string>
+    <string name="excepciones_titulo">Excepciones del Artículo 33 - ROTC</string>
+    <string name="excepciones_intro">Según el artículo 33.2 del Reglamento de Ordenación del Transporte por Carretera, no será necesaria la previa obtención de autorización para realizar las siguientes modalidades de transporte público:</string>
+    <string name="excepciones_a">a) Transportes realizados en vehículos cuya velocidad máxima autorizada no supere los 40 kilómetros por hora.</string>
+    <string name="excepciones_b">b) Transportes realizados en vehículos que lleven unidos de forma permanente máquinas o instrumentos tales como los destinados a grupos electrógenos, grúas de elevación, equipos de sondeo, etc., constituyendo dichas máquinas o instrumentos el uso exclusivo del vehículo. Esta exención incluirá el transporte a bordo de tales vehículos de aquellas piezas, herramientas u otros adminículos que resulten necesarios para el correcto funcionamiento de la máquina o equipo o la adecuada prestación de los servicios a que se encuentran destinados.</string>
+    <string name="excepciones_c">c) Transportes realizados en vehículos de menos de 3 ruedas.</string>
+    <string name="excepciones_d">d) Transportes de mercancías realizados en vehículos cuya masa máxima autorizada no sea superior a 2 toneladas.</string>
+    <string name="excepciones_d_bis">Asimismo, estarán exentos los transportes de mercancías realizados en vehículos de la categoría N1 que utilicen como fuente de energía combustibles alternativos, cuya masa máxima autorizada no sea superior a 2,5 toneladas, siempre que su capacidad de carga útil no se incremente respecto de un vehículo equivalente cuya masa máxima autorizada no sea superior a 2 toneladas.</string>
+    <string name="excepciones_e">e) Transportes realizados íntegramente en recintos cerrados dedicados a actividades distintas del transporte terrestre, salvo en aquellos supuestos en que, por concurrir circunstancias de especial repercusión en el transporte de la zona, el órgano competente de la Administración de transportes, mediante resolución motivada, establezca expresamente la obligatoriedad de autorización.</string>
+    <string name="excepciones_f">f) Transportes de equipajes en remolques arrastrados por vehículos destinados al de viajeros.</string>
+    <string name="excepciones_g">g) Transportes de basuras e inmundicias de carácter doméstico realizados en vehículos especialmente acondicionados para ello o que, en cualquier caso, hubiesen sido adquiridos con este fin por la correspondiente Entidad local.</string>
+    <string name="excepciones_h">h) Transportes de dinero, valores y mercancías preciosas realizados en vehículos especialmente acondicionados para ello.</string>
+    <string name="excepciones_i">i) Transportes de medicamentos, de aparatos y equipos médicos, y de otros artículos necesarios en casos de ayudas urgentes y, en particular, de catástrofes naturales.</string>
+    <string name="excepciones_j">j) Transportes realizados con ocasión de la impartición de clases prácticas destinadas a la obtención del permiso de conducción o del certificado de aptitud profesional de los conductores (CAP).</string>
+    <string name="excepciones_k">k) Transportes realizados utilizando vehículos históricos conceptuados como tales de conformidad con lo dispuesto en el Reglamento de Vehículos Históricos, aprobado por el Real Decreto 1247/1995, de 14 de julio.</string>
+    <string name="excepciones_nota_legal">Esta información es de carácter orientativo. Para la interpretación y aplicación exacta, consulte siempre el texto oficial del Reglamento de Ordenación del Transporte por Carretera (Real Decreto 1211/1990) y la Ley de Ordenación de los Transportes Terrestres (LOTT).</string>
+
     <string name="api_nap_base_url" translatable="false">https://nap.transportes.gob.es</string>
     <string name="api_nap_user_agent" translatable="false">ConsultaREAT Android App - contacto@oscar.com</string>
 </resources>

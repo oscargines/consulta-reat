@@ -29,6 +29,7 @@ import androidx.compose.material.icons.outlined.ListAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -61,6 +62,7 @@ import com.oscar.consultareat.data.cache.HistorialCache
 import com.oscar.consultareat.data.client.RgtClient
 import com.oscar.consultareat.ui.acercade.AcercaDeScreen
 import com.oscar.consultareat.ui.consulta.ConsultaScreen
+import com.oscar.consultareat.ui.excepciones.ExcepcionesScreen
 import com.oscar.consultareat.ui.historial.HistorialScreen
 import com.oscar.consultareat.ui.inicio.PantallaPrincipal
 import com.oscar.consultareat.ui.resultado.ResultadoScreen
@@ -75,6 +77,7 @@ private const val TAG = "ConsultaREAT.Navigation"
 private const val RUTA_INICIO = "inicio"
 private const val RUTA_CONSULTAS = "consultas"
 private const val RUTA_HISTORIAL = "historial"
+private const val RUTA_EXCEPCIONES = "excepciones"
 private const val RUTA_ACERCADE = "acercade"
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,7 +121,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                     pantallaActual = pantallaActual,
                     onSelect = { ruta ->
                         navController.navigate(ruta) {
-                            popUpTo(RUTA_INICIO) { saveState = true }
+                            popUpTo(navController.graph.startDestinationId) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -126,7 +129,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                     onNuevaConsulta = {
                         viewModel.nuevaConsulta()
                         navController.navigate(RUTA_CONSULTAS) {
-                            popUpTo(RUTA_INICIO) { inclusive = true }
+                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
                             launchSingleTop = true
                         }
                     }
@@ -144,6 +147,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 PantallaPrincipal(
                     onConsultas = { navController.navigate(RUTA_CONSULTAS) { launchSingleTop = true } },
                     onHistorial = { navController.navigate(RUTA_HISTORIAL) { launchSingleTop = true } },
+                    onExcepciones = { navController.navigate(RUTA_EXCEPCIONES) { launchSingleTop = true } },
                     onAcercaDe = { navController.navigate(RUTA_ACERCADE) { launchSingleTop = true } }
                 )
             }
@@ -174,6 +178,11 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                         navController.navigate(RUTA_CONSULTAS) { launchSingleTop = true }
                     },
                     onItemDelete = { viewModel.eliminarHistorial(it) }
+                )
+            }
+            composable(RUTA_EXCEPCIONES) {
+                ExcepcionesScreen(
+                    onBack = { navController.navigate(RUTA_INICIO) { launchSingleTop = true } }
                 )
             }
             composable(RUTA_ACERCADE) {
@@ -291,18 +300,18 @@ private fun BarraInferior(
                 onClick = { onSelect(RUTA_CONSULTAS) },
                 modifier = Modifier.weight(1f)
             )
-            Box(
+            androidx.compose.material3.IconButton(
+                onClick = onNuevaConsulta,
                 modifier = Modifier
                     .weight(1f)
-                    .fillMaxHeight(),
-                contentAlignment = Alignment.Center
+                    .fillMaxHeight()
+                    .padding(horizontal = 4.dp)
             ) {
                 Box(
                     modifier = Modifier
                         .size(50.dp)
                         .clip(CircleShape)
-                        .background(AzulInstitucional)
-                        .clickable(onClick = onNuevaConsulta),
+                        .background(AzulInstitucional),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

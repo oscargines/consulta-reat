@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,6 +50,7 @@ import com.oscar.consultareat.ui.theme.TextoSecundario
 fun PantallaPrincipal(
     onConsultas: () -> Unit,
     onHistorial: () -> Unit,
+    onExcepciones: () -> Unit,
     onAcercaDe: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -109,6 +111,12 @@ fun PantallaPrincipal(
             subtitulo = "Consulta tus búsquedas anteriores",
             icono = Icons.Filled.History,
             onClick = onHistorial
+        )
+        TarjetaAcceso(
+            titulo = "Consulta excepciones",
+            subtitulo = "Excepciones a la obligación de título habilitante (Art. 33 ROTC)",
+            icono = Icons.Filled.Article,
+            onClick = onExcepciones
         )
         TarjetaAcceso(
             titulo = "Acerca de",

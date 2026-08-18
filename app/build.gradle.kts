@@ -29,8 +29,8 @@ android {
         applicationId = "com.oscar.consultareat"
         minSdk = 31
         targetSdk = 37
-        versionCode = 3
-        versionName = "1.1.2"
+        versionCode = 4
+        versionName = "1.2.0"
 
         val localProps = rootProject.file("local.properties")
         val napApiKey = if (localProps.exists()) {
@@ -76,6 +76,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.camera.core)
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.androidx.webkit)
     implementation(libs.androidx.navigation.compose)
