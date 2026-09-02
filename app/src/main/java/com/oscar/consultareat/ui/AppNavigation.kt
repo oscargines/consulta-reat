@@ -120,10 +120,19 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                 BarraInferior(
                     pantallaActual = pantallaActual,
                     onSelect = { ruta ->
-                        navController.navigate(ruta) {
-                            popUpTo(navController.graph.startDestinationId) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
+                        if (ruta == RUTA_INICIO) {
+                            // Volver a la pantalla raíz debe desapilar la pantalla actual.
+                            if (!navController.popBackStack(RUTA_INICIO, inclusive = false)) {
+                                navController.navigate(RUTA_INICIO) {
+                                    launchSingleTop = true
+                                }
+                            }
+                        } else {
+                            navController.navigate(ruta) {
+                                popUpTo(navController.graph.startDestinationId) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
                     },
                     onNuevaConsulta = {
@@ -352,6 +361,7 @@ private fun ElementoInferior(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = modifier
+            .fillMaxHeight()
             .clickable(onClick = onClick)
     ) {
         Icon(
