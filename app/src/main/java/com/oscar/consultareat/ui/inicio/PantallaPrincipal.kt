@@ -16,13 +16,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -51,6 +54,7 @@ fun PantallaPrincipal(
     onConsultas: () -> Unit,
     onHistorial: () -> Unit,
     onExcepciones: () -> Unit,
+    onBaremo: () -> Unit,
     onAcercaDe: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -67,6 +71,7 @@ fun PantallaPrincipal(
         modifier = modifier
             .fillMaxSize()
             .background(FondoGris)
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp, vertical = 24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -119,13 +124,19 @@ fun PantallaPrincipal(
             onClick = onExcepciones
         )
         TarjetaAcceso(
+            titulo = "Baremo sancionador",
+            subtitulo = "Busca infracciones, gravedad, normas y cuantías",
+            icono = Icons.Filled.Gavel,
+            onClick = onBaremo
+        )
+        TarjetaAcceso(
             titulo = "Acerca de",
             subtitulo = "Información legal y fuentes de datos",
             icono = Icons.Outlined.Info,
             onClick = onAcercaDe
         )
 
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 

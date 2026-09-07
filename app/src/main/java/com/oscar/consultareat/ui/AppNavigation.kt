@@ -61,6 +61,9 @@ import com.oscar.consultareat.data.api.ReatApiConfig
 import com.oscar.consultareat.data.cache.HistorialCache
 import com.oscar.consultareat.data.client.RgtClient
 import com.oscar.consultareat.ui.acercade.AcercaDeScreen
+import com.oscar.consultareat.ui.baremo.BaremoScreen
+import com.oscar.consultareat.ui.baremo.BaremoViewModel
+import com.oscar.consultareat.ui.baremo.BaremoViewModelFactory
 import com.oscar.consultareat.ui.consulta.ConsultaScreen
 import com.oscar.consultareat.ui.excepciones.ExcepcionesScreen
 import com.oscar.consultareat.ui.historial.HistorialScreen
@@ -78,6 +81,7 @@ private const val RUTA_INICIO = "inicio"
 private const val RUTA_CONSULTAS = "consultas"
 private const val RUTA_HISTORIAL = "historial"
 private const val RUTA_EXCEPCIONES = "excepciones"
+private const val RUTA_BAREMO = "baremo"
 private const val RUTA_ACERCADE = "acercade"
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -95,7 +99,10 @@ fun AppNavigation(modifier: Modifier = Modifier) {
     }
     val viewModelFactory = remember { ConsultaViewModelFactory(repository) }
     val viewModel: ConsultaViewModel = viewModel(factory = viewModelFactory)
+    val baremoViewModelFactory = remember { BaremoViewModelFactory(context.applicationContext) }
+    val baremoViewModel: BaremoViewModel = viewModel(factory = baremoViewModelFactory)
     val uiState by viewModel.uiState.collectAsState()
+    val baremoState by baremoViewModel.uiState.collectAsState()
     val historial by viewModel.historial.collectAsState(initial = emptyList())
     val avisoDuplicado by viewModel.avisoDuplicado.collectAsState()
     val avisoSinResultados by viewModel.avisoSinResultados.collectAsState()
@@ -157,6 +164,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                     onConsultas = { navController.navigate(RUTA_CONSULTAS) { launchSingleTop = true } },
                     onHistorial = { navController.navigate(RUTA_HISTORIAL) { launchSingleTop = true } },
                     onExcepciones = { navController.navigate(RUTA_EXCEPCIONES) { launchSingleTop = true } },
+                    onBaremo = { navController.navigate(RUTA_BAREMO) { launchSingleTop = true } },
                     onAcercaDe = { navController.navigate(RUTA_ACERCADE) { launchSingleTop = true } }
                 )
             }
@@ -192,6 +200,16 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             composable(RUTA_EXCEPCIONES) {
                 ExcepcionesScreen(
                     onBack = { navController.navigate(RUTA_INICIO) { launchSingleTop = true } }
+                )
+            }
+            composable(RUTA_BAREMO) {
+                BaremoScreen(
+                    state = baremoState,
+                    onBack = { navController.navigate(RUTA_INICIO) { launchSingleTop = true } },
+                    onSearchChange = baremoViewModel::actualizarBusqueda,
+                    onSeverityChange = baremoViewModel::seleccionarGravedad,
+                    onIndexChange = baremoViewModel::seleccionarIndice,
+                    onRetry = baremoViewModel::reintentar
                 )
             }
             composable(RUTA_ACERCADE) {

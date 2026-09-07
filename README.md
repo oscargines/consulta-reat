@@ -15,6 +15,7 @@ La aplicación consulta los datos públicos del REAT publicados por el Ministeri
 - **Resultados en tarjetas** con estado visual (vigente / en trámite / caducada) y detalle expandible.
 - **Historial local** de consultas (hasta 20 registros, 30 días de retención, con detección de duplicados).
 - **Pantalla principal** con logo, acceso a Consultas / Historial / Acerca de y barra de navegación inferior en las pantallas internas.
+- **Baremo sancionador** local, versión 7.3, con 1.066 infracciones, filtros por índice y gravedad, búsqueda textual y detalle normativo.
 - **Acerca de** con información legal, versión y enlaces a las fuentes de datos.
 
 ## Tecnologías
@@ -22,7 +23,7 @@ La aplicación consulta los datos públicos del REAT publicados por el Ministeri
 | Capa | Tecnología |
 | --- | --- |
 | UI | Jetpack Compose (Material 3), Navigation Compose, StateFlow |
-| Datos | OkHttp, jsoup (parseo HTML), DataStore Preferences (historial) |
+| Datos | OkHttp, jsoup (parseo HTML), DataStore Preferences (historial), SQLite local (baremo sancionador) |
 | Arquitectura | MVVM (ViewModel + StateFlow + Repository) |
 | Lenguaje | Kotlin (minSdk 31, target/compile SDK 37) |
 | Tests | JUnit (unit tests del parser y del mapper NAP) |
@@ -85,6 +86,7 @@ app/src/main/java/com/oscar/consultareat/
 │   ├── consulta/     # Formulario de consulta + WebView de CAPTCHA
 │   ├── resultado/    # Resultados en tarjetas con estado
 │   ├── historial/    # Historial de consultas
+│   ├── baremo/       # Consulta local del baremo sancionador
 │   ├── acercade/     # Información legal y fuentes
 │   ├── theme/        # Tema y paleta de colores
 │   └── viewmodel/    # ConsultaViewModel + UiState
@@ -93,6 +95,8 @@ app/src/main/java/com/oscar/consultareat/
 ├── MainActivity.kt        # Punto de entrada de la UI
 └── ConsultaREATApplication.kt
 ```
+
+La base de datos `BasermoSancionador.db` se incluye en `app/src/main/assets/` y se copia al almacenamiento privado de la aplicación en el primer acceso al baremo. La consulta admite filtros por índice y gravedad, búsqueda sin distinguir mayúsculas ni acentos y detalle completo de cada infracción.
 
 ## Documentación técnica
 
