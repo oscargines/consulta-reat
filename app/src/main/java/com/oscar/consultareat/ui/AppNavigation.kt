@@ -67,6 +67,7 @@ import com.oscar.consultareat.ui.baremo.BaremoViewModelFactory
 import com.oscar.consultareat.ui.consulta.ConsultaScreen
 import com.oscar.consultareat.ui.excepciones.ExcepcionesScreen
 import com.oscar.consultareat.ui.historial.HistorialScreen
+import com.oscar.consultareat.ui.inspeccion.InspeccionTransEscolarScreen
 import com.oscar.consultareat.ui.inicio.PantallaPrincipal
 import com.oscar.consultareat.ui.resultado.ResultadoScreen
 import com.oscar.consultareat.ui.theme.AzulInstitucional
@@ -81,6 +82,7 @@ private const val RUTA_INICIO = "inicio"
 private const val RUTA_CONSULTAS = "consultas"
 private const val RUTA_HISTORIAL = "historial"
 private const val RUTA_EXCEPCIONES = "excepciones"
+private const val RUTA_INSPECCION_TRANS_ESCOLAR = "inspeccion-trans-escolar"
 private const val RUTA_BAREMO = "baremo"
 private const val RUTA_ACERCADE = "acercade"
 
@@ -164,6 +166,10 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                     onConsultas = { navController.navigate(RUTA_CONSULTAS) { launchSingleTop = true } },
                     onHistorial = { navController.navigate(RUTA_HISTORIAL) { launchSingleTop = true } },
                     onExcepciones = { navController.navigate(RUTA_EXCEPCIONES) { launchSingleTop = true } },
+                    onInspeccionTransEscolar = {
+                        viewModel.nuevaConsulta()
+                        navController.navigate(RUTA_INSPECCION_TRANS_ESCOLAR) { launchSingleTop = true }
+                    },
                     onBaremo = { navController.navigate(RUTA_BAREMO) { launchSingleTop = true } },
                     onAcercaDe = { navController.navigate(RUTA_ACERCADE) { launchSingleTop = true } }
                 )
@@ -200,6 +206,17 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             composable(RUTA_EXCEPCIONES) {
                 ExcepcionesScreen(
                     onBack = { navController.navigate(RUTA_INICIO) { launchSingleTop = true } }
+                )
+            }
+            composable(RUTA_INSPECCION_TRANS_ESCOLAR) {
+                InspeccionTransEscolarScreen(
+                    uiState = uiState,
+                    onConsultar = viewModel::ejecutarConsulta,
+                    onResultadoHtmlObtenido = { html, tipo -> viewModel.parsearHtmlResultado(html, tipo) },
+                    onBack = {
+                        viewModel.nuevaConsulta()
+                        navController.navigate(RUTA_INICIO) { launchSingleTop = true }
+                    }
                 )
             }
             composable(RUTA_BAREMO) {

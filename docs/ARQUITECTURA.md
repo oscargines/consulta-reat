@@ -10,7 +10,8 @@ Aplicación Android nativa en **Kotlin** con **Jetpack Compose** y arquitectura 
 ┌────────────────────────────────────────────────────────┐
 │ UI (Compose)                                           │
 │  PantallaPrincipal · ConsultaScreen · ResultadoScreen  │
-│  HistorialScreen · BaremoScreen · AcercaDeScreen       │
+│  HistorialScreen · BaremoScreen · InspeccionScreen     │
+│  AcercaDeScreen                                        │
 │  AppNavigation                                         │
 └──────────────▲──────────────────────▲──────────────────┘
                │ StateFlow (UiState)  │ eventos (onConsultar, ...)
@@ -37,12 +38,13 @@ Aplicación Android nativa en **Kotlin** con **Jetpack Compose** y arquitectura 
 
 ### 1. UI (`ui/`)
 
-- **`AppNavigation.kt`** – `NavHost` con las rutas `inicio`, `consultas`, `historial`, `baremo` y `acercade`. La barra inferior de navegación (Inicio, Consultas, `+`, Historial, Acerca de) solo se muestra fuera de la pantalla principal. El botón `+` abre una nueva consulta.
-- **`PantallaPrincipal.kt`** – Logo, nombre y tarjetas de acceso (Consultas, Historial, Acerca de).
+- **`AppNavigation.kt`** – `NavHost` con las rutas `inicio`, `consultas`, `historial`, `excepciones`, `inspeccion-trans-escolar`, `baremo` y `acercade`. La barra inferior de navegación solo se muestra fuera de la pantalla principal; la inspección escolar solo se abre desde su tarjeta de inicio.
+- **`PantallaPrincipal.kt`** – Logo, nombre y tarjetas de acceso. El orden inferior incluye Baremo sancionador, Inspección Trans Escolar y Acerca de.
 - **`ConsultaScreen.kt`** – Formulario (tipo de consulta, tipo de identificación, campo de texto) y `CaptchaWebView` para resolver el CAPTCHA de la web oficial cuando aparece. Muestra un indicador de carga durante las consultas.
 - **`ResultadoScreen.kt`** – Tarjetas con estado (vigente / en trámite / caducada) y detalle expandible. Cada valor se pinta debajo de su etiqueta.
 - **`HistorialScreen.kt`** – Lista de consultas guardadas con acceso al detalle y borrado.
 - **`BaremoScreen.kt`** – Consulta local de infracciones, con búsqueda, filtros por índice/gravedad, agrupación por subíndice y detalle normativo.
+- **`InspeccionTransEscolarScreen.kt`** – Consulta de matrícula, datos del autobús, cálculo de antigüedad al 1 de septiembre, avisos de antigüedad/autorización y checklist operativo del RD 443/2001 con modales consecutivos del codificado DGT.
 - **`AcercaDeScreen.kt`** – Información legal, versión y enlaces a las fuentes.
 
 ### 2. ViewModel (`ui/viewmodel/`)
@@ -81,6 +83,7 @@ Orquesta las fuentes de datos y el historial. Decide qué fuente usar:
 - **`cache/HistorialCache.kt`** – historial en `DataStore` (Preferences) con límite de 20 registros, retención de 30 días y deduplicación.
 - **`baremo/BaremoDatabase.kt`** – copia la base SQLite incluida en assets al almacenamiento privado de Android.
 - **`baremo/BaremoRepository.kt`** – consulta índices e infracciones; aplica filtros SQL y normaliza la búsqueda libre para admitir acentos opcionales.
+- **`ui/inspeccion/InspeccionTransEscolarScreen.kt`** – usa la consulta `VEHICULO + MATRICULA`, reutiliza el OCR y el CAPTCHA, y mantiene el estado local de las casillas y de los avisos.
 
 ### Consulta local del baremo sancionador
 
@@ -101,6 +104,20 @@ La pantalla muestra los índices como una lista seleccionable. Los resultados se
 5. Se **guarda en el historial** (con aviso si ya existía).
 6. La UI navega a la pantalla de **Resultado**, mostrando tarjetas por sección.
 
+## Flujo de inspección de transporte escolar
+
+1. El usuario entra desde la tarjeta **Inspección Trans Escolar** de la pantalla principal.
+2. Introduce o captura una matrícula y se ejecuta una consulta REAT de tipo `VEHICULO`.
+3. La pantalla muestra los datos disponibles del autobús: matrícula, fecha de matriculación, autorización, validez, empresa y domicilio.
+4. La antigüedad se calcula con la fecha de primera matriculación tomando como referencia el **1 de septiembre del inicio del curso escolar vigente**.
+5. Se genera un aviso cuando el vehículo supera los 10 años. El aviso recuerda que entre 10 y 16 años solo puede utilizarse si se acredita una de las condiciones del artículo 3 del RD 443/2001.
+6. Se genera una alerta cuando supera los 16 años, porque no puede realizar estos servicios con carácter general.
+7. Si el resultado no contiene autorizaciones de transporte, se muestra una alerta específica.
+8. El inspector marca las comprobaciones que se cumplen y pulsa **Comprobar**.
+9. Cada requisito no marcado genera un modal consecutivo con el código DGT, hecho infringido, multa, responsable, norma, precepto sancionador y observaciones.
+
+La guía de implementación y las correspondencias se documentan en [Inspección de transporte escolar](INSPECCION_TRANSPORTE_ESCOLAR.md).
+
 ## Flujo CAPTCHA (WebView)
 
 Cuando la web oficial devuelve el formulario con CAPTCHA:
@@ -117,6 +134,8 @@ Cuando la web oficial devuelve el formulario con CAPTCHA:
 | `inicio` | Pantalla principal (logo + accesos) | No |
 | `consultas` | Formulario o resultado según `UiState` | Sí |
 | `historial` | Historial de consultas | Sí |
+| `excepciones` | Excepciones del artículo 33 ROTC | Sí |
+| `inspeccion-trans-escolar` | Inspección de transporte escolar | Sí |
 | `baremo` | Consulta local del baremo sancionador | Sí |
 | `acercade` | Información legal y fuentes | Sí |
 

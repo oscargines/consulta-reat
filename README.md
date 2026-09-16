@@ -16,6 +16,7 @@ La aplicación consulta los datos públicos del REAT publicados por el Ministeri
 - **Historial local** de consultas (hasta 20 registros, 30 días de retención, con detección de duplicados).
 - **Pantalla principal** con logo, acceso a Consultas / Historial / Acerca de y barra de navegación inferior en las pantallas internas.
 - **Baremo sancionador** local, versión 7.3, con 1.066 infracciones, filtros por índice y gravedad, búsqueda textual y detalle normativo.
+- **Inspección de Transporte Escolar**: consulta de autobuses por matrícula, importación de datos del REAT, cálculo de antigüedad al 1 de septiembre y guía rápida del Real Decreto 443/2001.
 - **Acerca de** con información legal, versión y enlaces a las fuentes de datos.
 
 ## Tecnologías
@@ -87,6 +88,7 @@ app/src/main/java/com/oscar/consultareat/
 │   ├── resultado/    # Resultados en tarjetas con estado
 │   ├── historial/    # Historial de consultas
 │   ├── baremo/       # Consulta local del baremo sancionador
+│   ├── inspeccion/    # Inspección de transporte escolar (RD 443/2001)
 │   ├── acercade/     # Información legal y fuentes
 │   ├── theme/        # Tema y paleta de colores
 │   └── viewmodel/    # ConsultaViewModel + UiState
@@ -98,10 +100,13 @@ app/src/main/java/com/oscar/consultareat/
 
 La base de datos `BasermoSancionador.db` se incluye en `app/src/main/assets/` y se copia al almacenamiento privado de la aplicación en el primer acceso al baremo. La consulta admite filtros por índice y gravedad, búsqueda sin distinguir mayúsculas ni acentos y detalle completo de cada infracción.
 
+La documentación de referencia para la inspección de transporte escolar se incluye en `docs/INSPECCION_TRANSPORTE_ESCOLAR.md`. El codificado DGT entregado para el proyecto está disponible en `docs/CODIFICADO-DGT-20-MAYO-2026.pdf`.
+
 ## Documentación técnica
 
 - [Arquitectura](docs/ARQUITECTURA.md): capas, flujo de datos, navegación y decisiones de diseño.
 - [API y fuentes](docs/API_FUENTES.md): detalle del flujo web del REAT y de la API NAP.
+- [Inspección de transporte escolar](docs/INSPECCION_TRANSPORTE_ESCOLAR.md): flujo, cálculo de antigüedad, checklist y correspondencias sancionadoras.
 
 ## Fuentes de datos
 

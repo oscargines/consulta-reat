@@ -432,7 +432,7 @@ private fun OpcionTipoConsulta(
 
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-private fun CaptchaWebView(
+internal fun CaptchaWebView(
     request: ConsultaRequest,
     onResultadoHtmlObtenido: (String, TipoConsulta) -> Unit,
     onVolver: () -> Unit,

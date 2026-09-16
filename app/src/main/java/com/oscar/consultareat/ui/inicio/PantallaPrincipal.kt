@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Article
+import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
@@ -54,6 +55,7 @@ fun PantallaPrincipal(
     onConsultas: () -> Unit,
     onHistorial: () -> Unit,
     onExcepciones: () -> Unit,
+    onInspeccionTransEscolar: () -> Unit,
     onBaremo: () -> Unit,
     onAcercaDe: () -> Unit,
     modifier: Modifier = Modifier
@@ -128,6 +130,12 @@ fun PantallaPrincipal(
             subtitulo = "Busca infracciones, gravedad, normas y cuantías",
             icono = Icons.Filled.Gavel,
             onClick = onBaremo
+        )
+        TarjetaAcceso(
+            titulo = "Inspección Trans Escolar",
+            subtitulo = "Comprueba los requisitos del Real Decreto 443/2001",
+            icono = Icons.Filled.DirectionsBus,
+            onClick = onInspeccionTransEscolar
         )
         TarjetaAcceso(
             titulo = "Acerca de",

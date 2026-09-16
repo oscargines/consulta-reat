@@ -33,6 +33,8 @@ Se realiza un `POST` (form-urlencoded) a la base URL:
 
 Headers requeridos: `Content-Type: application/x-www-form-urlencoded`, `Referer` (URL del formulario inicial) y un `User-Agent` descriptivo.
 
+La inspección escolar utiliza esta misma operación con `tpsolic=M` y `accion=consultar_nif`, enviando la matrícula en `consulta`. La pantalla no crea un endpoint paralelo: reutiliza el cliente, parser, CAPTCHA e historial del flujo REAT.
+
 ### Respuesta
 
 - Si la respuesta es un **formulario con CAPTCHA**, la app devuelve `RequiereCaptcha` y el usuario lo resuelve en un WebView.
@@ -117,3 +119,5 @@ El fallo o ausencia de clave NAP **nunca bloquea** la consulta principal.
 - [Consulta pública del REAT – Ministerio de Transportes](https://apps.fomento.gob.es/crgt/servlet/ServletController?modulo=datosconsulta&accion=inicio&lang=es&estilo=default)
 - [NAP – Plataforma de Datos Abiertos del Transporte](https://nap.transportes.gob.es)
 - [datos.gob.es](https://datos.gob.es)
+- [Real Decreto 443/2001 consolidado – BOE](https://www.boe.es/buscar/act.php?id=BOE-A-2001-8503)
+- [Codificado DGT de 20 de mayo de 2026](CODIFICADO-DGT-20-MAYO-2026.pdf) (documento de referencia incorporado al repositorio)
