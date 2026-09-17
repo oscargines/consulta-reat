@@ -27,6 +27,10 @@ import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Print
+import com.oscar.consultareat.data.print.printActaInspeccion
+import com.oscar.consultareat.data.repository.BluetoothPrinterStorage
+import com.oscar.consultareat.domain.ActaInspeccionData
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -56,6 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.oscar.consultareat.domain.ConsultaRequest
 import com.oscar.consultareat.domain.ConsultaResultado
@@ -126,6 +131,8 @@ fun InspeccionTransEscolarScreen(
     onConsultar: (ConsultaRequest) -> Unit,
     onResultadoHtmlObtenido: (String, TipoConsulta) -> Unit,
     onBack: () -> Unit,
+    onAbrirConfiguracionImpresora: () -> Unit,
+    onImprimirActa: (ConsultaResultado) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var matricula by remember { mutableStateOf("") }
@@ -134,6 +141,7 @@ fun InspeccionTransEscolarScreen(
     var avisos by remember { mutableStateOf(emptyList<String>()) }
     var incidencias by remember { mutableStateOf<List<IncidenciaDgt>>(emptyList()) }
     var incidenciaActual by remember { mutableStateOf(0) }
+    var mostrarAvisoImpresora by remember { mutableStateOf(false) }
 
     LaunchedEffect(uiState) {
         avisos = when (val state = uiState) {
@@ -147,6 +155,8 @@ fun InspeccionTransEscolarScreen(
         if (it) mostrandoScanner = true
     }
 
+    val puedeImprimir = uiState is UiState.Success
+
     Scaffold(
         modifier = modifier,
         containerColor = FondoGris,
@@ -154,8 +164,15 @@ fun InspeccionTransEscolarScreen(
             TopAppBar(
                 title = { Text("Inspección de Transporte Escolar") },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    androidx.compose.material3.IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Volver")
+                    }
+                },
+                actions = {
+                    androidx.compose.material3.IconButton(
+                        onClick = onAbrirConfiguracionImpresora
+                    ) {
+                        Icon(Icons.Filled.Print, contentDescription = "Configurar impresora", tint = AzulInstitucional)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -234,7 +251,53 @@ fun InspeccionTransEscolarScreen(
                         modifier = Modifier.fillMaxWidth().height(52.dp),
                         shape = RoundedCornerShape(14.dp)
                     ) { Text("Comprobar") }
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(8.dp))
+                    // Botón imprimir siempre visible; habilitado solo con éxito y impresora configurada
+                    val resultadoSuccess = (uiState as? UiState.Success)?.resultado
+                    val hayResultado = resultadoSuccess != null
+                    val storage = BluetoothPrinterStorage(context)
+                    val hayImpresora = storage.hasDefaultPrinter()
+                    Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Button(
+                            onClick = {
+                                if (hayResultado && hayImpresora) {
+                                    val defaultPrinter = storage.getDefaultPrinter()
+                                    defaultPrinter?.let { printer ->
+                                        val actaData = ActaInspeccionData(
+                                            matricula = resultadoSuccess.matricula ?: "",
+                                            empresaTitular = resultadoSuccess.empresaTitular ?: "",
+                                            numeroAutorizacion = resultadoSuccess.numeroAutorizacion ?: ""
+                                        )
+                                        printActaInspeccion(context, printer.mac, actaData)
+                                    }
+                                } else if (!hayImpresora) {
+                                    mostrarAvisoImpresora = true
+                                }
+                            },
+                            enabled = hayResultado && hayImpresora,
+                            modifier = Modifier.fillMaxWidth().height(52.dp),
+                            shape = RoundedCornerShape(14.dp),
+                            colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                                containerColor = if (hayResultado && hayImpresora) AzulInstitucional else MaterialTheme.colorScheme.surfaceContainerHighest,
+                                contentColor = if (hayResultado && hayImpresora) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(Icons.Filled.Print, contentDescription = "", tint = if (hayResultado && hayImpresora) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    if (hayResultado && hayImpresora) "Imprimir Acta de Inspección"
+                                    else if (!hayImpresora) "Configurar impresora primero"
+                                    else "Realiza una consulta primero",
+                                    fontWeight = FontWeight.Bold, fontSize = 16.sp
+                                )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
                 }
             }
             if (mostrandoScanner) {
@@ -281,6 +344,23 @@ fun InspeccionTransEscolarScreen(
                 TextButton(onClick = { incidenciaActual++ }) {
                     Text(if (incidenciaActual == incidencias.lastIndex) "Finalizar" else "Siguiente")
                 }
+            }
+        )
+    }
+
+    if (mostrarAvisoImpresora) {
+        AlertDialog(
+            onDismissRequest = { mostrarAvisoImpresora = false },
+            title = { Text("Impresora no configurada") },
+            text = { Text("No hay ninguna impresora Zebra configurada. Debes configurar una impresora ZQ521 o RW420 antes de imprimir.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    mostrarAvisoImpresora = false
+                    onAbrirConfiguracionImpresora()
+                }) { Text("Configurar impresora") }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarAvisoImpresora = false }) { Text("Cancelar") }
             }
         )
     }
@@ -343,13 +423,13 @@ private fun DatosAutobus(resultado: ConsultaResultado) {
     Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = Color.White), modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Text("Datos importados", fontWeight = FontWeight.Bold, color = AzulInstitucional)
-            DatoImportado("Matrícula", resultado.identidadValor ?: buscarDato(todos, "matrícula", "matricula"))
+            DatoImportado("Matrícula", resultado.matricula ?: buscarDato(todos, "matrícula", "matricula"))
             DatoImportado("Fecha de matriculación", buscarDato(todos, "matriculaci"))
             DatoImportado("Antigüedad al 1 de septiembre", antiguedad?.let { "$it años" })
             DatoImportado("Tipo de autorización", buscarDato(todos, "tipo de autoriz"))
-            DatoImportado("Número de autorización", buscarDato(todos, "número", "numero", "autorización", "autorizacion"))
+            DatoImportado("Número de autorización", resultado.numeroAutorizacion ?: buscarDato(todos, "número", "numero", "autorización", "autorizacion"))
             DatoImportado("Validez", buscarDato(todos, "validez", "caducidad"))
-            DatoImportado("Empresa", resultado.identidadValor ?: buscarDato(todos, "empresa", "titular", "nombre"))
+            DatoImportado("Empresa", resultado.empresaTitular ?: buscarDato(todos, "empresa", "titular", "nombre"))
             DatoImportado("Domicilio", buscarDato(todos, "domicilio", "dirección", "direccion"))
         }
     }

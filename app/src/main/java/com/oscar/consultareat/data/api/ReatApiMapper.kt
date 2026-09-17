@@ -37,6 +37,9 @@ class ReatApiMapper {
             ParsedResult.Success(
                 identidadLabel = "Operadores encontrados",
                 identidadValor = operadores.size.toString(),
+                matricula = null,
+                empresaTitular = null,
+                numeroAutorizacion = null,
                 operadores = operadores,
                 conjuntosDatos = conjuntosDatos
             )

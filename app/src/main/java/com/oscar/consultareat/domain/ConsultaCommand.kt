@@ -26,6 +26,9 @@ class ConsultarRgtCommand(
                         ParsedResult.Success(
                             identidadLabel = parsed.identidadLabel,
                             identidadValor = parsed.identidadValor,
+                            matricula = parsed.matricula,
+                            empresaTitular = parsed.empresaTitular,
+                            numeroAutorizacion = parsed.numeroAutorizacion,
                             autorizaciones = parsed.autorizaciones,
                             vehiculos = parsed.vehiculos,
                             competenciaProfesional = parsed.competenciaProfesional,

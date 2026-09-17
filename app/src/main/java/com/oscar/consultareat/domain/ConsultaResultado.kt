@@ -5,6 +5,9 @@ import com.oscar.consultareat.data.parser.ParsedResult
 data class ConsultaResultado(
     val identidadLabel: String?,
     val identidadValor: String?,
+    val matricula: String?,
+    val empresaTitular: String?,
+    val numeroAutorizacion: String?,
     val autorizaciones: List<DatoItem> = emptyList(),
     val vehiculos: List<DatoItem> = emptyList(),
     val competenciaProfesional: List<DatoItem> = emptyList(),
@@ -25,6 +28,9 @@ data class DatoItem(
 fun ParsedResult.Success.toConsultaResultado(): ConsultaResultado = ConsultaResultado(
     identidadLabel = identidadLabel,
     identidadValor = identidadValor,
+    matricula = matricula,
+    empresaTitular = empresaTitular,
+    numeroAutorizacion = numeroAutorizacion,
     autorizaciones = autorizaciones,
     vehiculos = vehiculos,
     competenciaProfesional = competenciaProfesional,

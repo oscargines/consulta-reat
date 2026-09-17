@@ -15,6 +15,9 @@ class RgtHtmlParser {
             return ParsedResult.Success(
                 identidadLabel = null,
                 identidadValor = null,
+                matricula = null,
+                empresaTitular = null,
+                numeroAutorizacion = null,
                 autorizaciones = emptyList(),
                 vehiculos = emptyList(),
                 competenciaProfesional = emptyList(),
@@ -27,6 +30,9 @@ class RgtHtmlParser {
         val secciones = mutableMapOf<String, MutableList<DatoItem>>()
         var identidadLabel: String? = null
         var identidadValor: String? = null
+        var matricula: String? = null
+        var empresaTitular: String? = null
+        var numeroAutorizacion: String? = null
 
         doc.select("h3.ficha2_titulo").forEach { h3 ->
             val titulo = h3.text().lowercase().trim()
@@ -36,6 +42,12 @@ class RgtHtmlParser {
                     val items = parseTabla(siguiente)
                     categoria(titulo)?.let { clave ->
                         secciones.getOrPut(clave) { mutableListOf() }.addAll(items)
+                    }
+                    if (titulo.contains("vehículo") || titulo.contains("vehiculo")) {
+                        matricula = items.firstOrNull { it.etiqueta.lowercase().contains("matrícula") || it.etiqueta.lowercase().contains("matricula") }?.valor
+                    }
+                    if (titulo.contains("autorización") || titulo.contains("autorizacion")) {
+                        numeroAutorizacion = items.firstOrNull { it.etiqueta.lowercase().contains("número") || it.etiqueta.lowercase().contains("numero") }?.valor
                     }
                 }
                 siguiente != null -> {
@@ -47,6 +59,7 @@ class RgtHtmlParser {
                             if (nombre != null) {
                                 identidadLabel = "Empresa / Titular"
                                 identidadValor = nombre.valor
+                                empresaTitular = nombre.valor
                             } else {
                                 val nif = pares.firstOrNull { it.etiqueta.equals("NIF", true) }
                                 if (nif != null) {
@@ -64,9 +77,22 @@ class RgtHtmlParser {
             }
         }
 
+        if (matricula == null) {
+            matricula = secciones["vehiculos"]?.firstOrNull { it.etiqueta.lowercase().contains("matrícula") || it.etiqueta.lowercase().contains("matricula") }?.valor
+        }
+        if (numeroAutorizacion == null) {
+            numeroAutorizacion = secciones["autorizaciones"]?.firstOrNull { it.etiqueta.lowercase().contains("número") || it.etiqueta.lowercase().contains("numero") }?.valor
+        }
+        if (empresaTitular == null) {
+            empresaTitular = secciones["vehiculos"]?.firstOrNull { it.etiqueta.lowercase().contains("empresa") || it.etiqueta.lowercase().contains("titular") || it.etiqueta.lowercase().contains("nombre") }?.valor
+        }
+
         return ParsedResult.Success(
             identidadLabel = identidadLabel,
             identidadValor = identidadValor,
+            matricula = matricula,
+            empresaTitular = empresaTitular,
+            numeroAutorizacion = numeroAutorizacion,
             autorizaciones = secciones["autorizaciones"] ?: emptyList(),
             vehiculos = secciones["vehiculos"] ?: emptyList(),
             competenciaProfesional = secciones["competencia"] ?: emptyList(),
@@ -146,6 +172,9 @@ sealed interface ParsedResult {
     data class Success(
         val identidadLabel: String?,
         val identidadValor: String?,
+        val matricula: String?,
+        val empresaTitular: String?,
+        val numeroAutorizacion: String?,
         val autorizaciones: List<DatoItem> = emptyList(),
         val vehiculos: List<DatoItem> = emptyList(),
         val competenciaProfesional: List<DatoItem> = emptyList(),

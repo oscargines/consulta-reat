@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+    implementation(fileTree("libs") { include("*.jar") })
     testImplementation(libs.junit)
     testImplementation(libs.org.json)
     androidTestImplementation(platform(libs.androidx.compose.bom))

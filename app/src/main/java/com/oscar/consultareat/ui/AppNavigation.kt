@@ -55,6 +55,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.oscar.consultareat.data.print.printActaInspeccion
+import com.oscar.consultareat.data.repository.BluetoothPrinterStorage
+import com.oscar.consultareat.domain.ActaInspeccionData
+import com.oscar.consultareat.domain.ConsultaResultado
 import com.oscar.consultareat.RgtRepository
 import com.oscar.consultareat.data.api.ReatApiClient
 import com.oscar.consultareat.data.api.ReatApiConfig
@@ -68,6 +72,7 @@ import com.oscar.consultareat.ui.consulta.ConsultaScreen
 import com.oscar.consultareat.ui.excepciones.ExcepcionesScreen
 import com.oscar.consultareat.ui.historial.HistorialScreen
 import com.oscar.consultareat.ui.inspeccion.InspeccionTransEscolarScreen
+import com.oscar.consultareat.ui.impresora.BluetoothPrinterScreen
 import com.oscar.consultareat.ui.inicio.PantallaPrincipal
 import com.oscar.consultareat.ui.resultado.ResultadoScreen
 import com.oscar.consultareat.ui.theme.AzulInstitucional
@@ -85,6 +90,7 @@ private const val RUTA_EXCEPCIONES = "excepciones"
 private const val RUTA_INSPECCION_TRANS_ESCOLAR = "inspeccion-trans-escolar"
 private const val RUTA_BAREMO = "baremo"
 private const val RUTA_ACERCADE = "acercade"
+private const val RUTA_IMPRESORA_BLUETOOTH = "impresora-bluetooth"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -216,6 +222,12 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                     onBack = {
                         viewModel.nuevaConsulta()
                         navController.navigate(RUTA_INICIO) { launchSingleTop = true }
+                    },
+                    onAbrirConfiguracionImpresora = {
+                        navController.navigate(RUTA_IMPRESORA_BLUETOOTH)
+                    },
+                    onImprimirActa = { resultado ->
+                        // La impresión se maneja en la propia screen donde tenemos acceso al contexto
                     }
                 )
             }
@@ -232,6 +244,11 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             composable(RUTA_ACERCADE) {
                 AcercaDeScreen(
                     onBack = { navController.navigate(RUTA_INICIO) { launchSingleTop = true } }
+                )
+            }
+            composable(RUTA_IMPRESORA_BLUETOOTH) {
+                BluetoothPrinterScreen(
+                    onBackClick = { navController.popBackStack() }
                 )
             }
         }

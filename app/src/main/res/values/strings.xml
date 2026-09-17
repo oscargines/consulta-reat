@@ -34,4 +34,36 @@
 
     <string name="api_nap_base_url" translatable="false">https://nap.transportes.gob.es</string>
     <string name="api_nap_user_agent" translatable="false">ConsultaREAT Android App - contacto@oscar.com</string>
+
+    <!-- Bluetooth Printer Strings -->
+    <string name="bluetooth_printer_title">Configurar impresora Zebra</string>
+    <string name="bluetooth_printer_scan_action">Buscar</string>
+    <string name="bluetooth_printer_save_action">Guardar</string>
+    <string name="bluetooth_printer_saved_devices_label">Impresora guardada</string>
+    <string name="bluetooth_printer_no_saved_devices">No hay impresora guardada</string>
+    <string name="bluetooth_printer_not_linked">IMPRESORA NO CONFIGURADA</string>
+    <string name="bluetooth_printer_paired_label">Dispositivo emparejado:</string>
+    <string name="bluetooth_printer_save_default_action">Usar esta</string>
+    <string name="bluetooth_printer_only_supported_models">Solo se admiten estas impresoras: %1$s.</string>
+    <string name="bluetooth_printer_validating">Validando modelo de la impresora…</string>
+    <string name="bluetooth_printer_unknown_model">modelo desconocido</string>
+    <string name="bluetooth_printer_not_supported_model">Modelo detectado no compatible (%1$s). Solo se admiten: %2$s.</string>
+    <string name="bluetooth_printer_unknown_name">Dispositivo sin nombre (%1$s)</string>
+    <string name="bluetooth_printer_permissions_required">Es necesario conceder permisos Bluetooth para buscar impresoras.</string>
+    <string name="bluetooth_printer_not_supported">Este dispositivo no admite Bluetooth.</string>
+    <string name="bluetooth_printer_bluetooth_disabled">Bluetooth está desactivado. Debes activarlo para continuar.</string>
+    <string name="bluetooth_printer_scanning">Buscando impresoras Zebra durante 10 segundos…</string>
+    <string name="bluetooth_printer_scanning_countdown">Tiempo restante: %1$d s</string>
+    <string name="bluetooth_printer_scan_finished">Búsqueda finalizada.</string>
+    <string name="bluetooth_printer_scan_error">No se pudo iniciar la búsqueda Bluetooth.</string>
+    <string name="bluetooth_printer_location_disabled">Debes activar la ubicación (GPS) del dispositivo para buscar impresoras Bluetooth.</string>
+    <string name="bluetooth_printer_showing_paired_only">No se pudo iniciar la búsqueda activa; se muestran los dispositivos Bluetooth emparejados.</string>
+    <string name="bluetooth_printer_no_results">No se han encontrado dispositivos.</string>
+    <string name="bluetooth_printer_ready">Pantalla preparada para buscar y guardar impresoras.</string>
+    <string name="bluetooth_printer_saved_title">Impresora guardada</string>
+    <string name="bluetooth_printer_saved_status">Impresora predeterminada guardada: %1$s</string>
+    <string name="bluetooth_printer_select_one">Debes seleccionar una impresora encontrada.</string>
+    <string name="bluetooth_printer_select_saved_one">Debes seleccionar una impresora guardada.</string>
+    <string name="bluetooth_printer_discovered_devices">Dispositivos encontrados</string>
+    <string name="accept_action">Aceptar</string>
 </resources>

@@ -133,6 +133,9 @@ class HistorialCache(private val context: Context) {
     private fun jsonToResultado(json: JSONObject): ConsultaResultado = ConsultaResultado(
         identidadLabel = json.optString("identidadLabel").takeIf { it.isNotEmpty() },
         identidadValor = json.optString("identidadValor").takeIf { it.isNotEmpty() },
+        matricula = json.optString("matricula").takeIf { it.isNotEmpty() },
+        empresaTitular = json.optString("empresaTitular").takeIf { it.isNotEmpty() },
+        numeroAutorizacion = json.optString("numeroAutorizacion").takeIf { it.isNotEmpty() },
         autorizaciones = jsonToDatos(json.optJSONArray("autorizaciones")),
         vehiculos = jsonToDatos(json.optJSONArray("vehiculos")),
         competenciaProfesional = jsonToDatos(json.optJSONArray("competenciaProfesional")),
