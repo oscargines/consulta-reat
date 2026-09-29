@@ -1,8 +1,8 @@
-# Consulta REAT
+# Consulta Transportes
 
 ![Logo](app/src/main/assets/logo%20grande.jpg)
 
-Aplicación Android para consultar el **Registro de Empresas y Actividades de Transporte (REAT)** a partir de **fuentes abiertas y públicas**.
+Aplicación Android de apoyo a la inspección del transporte por carretera: consulta del **Registro de Empresas y Actividades de Transporte (REAT)**, consulta del **ADR 2025** (códigos ONU, etiquetas y regla de los 1000 puntos) y guías de inspección, a partir de **fuentes abiertas y públicas**.
 
 La aplicación consulta los datos públicos del REAT publicados por el Ministerio de Transportes y Movilidad Sostenible y enriquece los resultados con los conjuntos de datos abiertos de la plataforma **NAP (Plataforma de Datos Abiertos del Transporte)**. No está afiliada a ningún organismo oficial y no garantiza la exactitud de los datos: verifica siempre la información en la fuente oficial.
 
@@ -14,10 +14,12 @@ La aplicación consulta los datos públicos del REAT publicados por el Ministeri
 - **Enriquecimiento con datos abiertos NAP**: cuando una consulta devuelve datos de una empresa, se completan los operadores y conjuntos de datos publicados en NAP.
 - **Resultados en tarjetas** con estado visual (vigente / en trámite / caducada) y detalle expandible.
 - **Historial local** de consultas (hasta 20 registros, 30 días de retención, con detección de duplicados).
-- **Pantalla principal** con logo, acceso a Consultas / Historial / Acerca de y barra de navegación inferior en las pantallas internas.
+- **Consulta ADR 2025**: búsqueda de mercancías por N.º ONU o nombre (Tablas A y B), placa naranja conforme a ADR 5.3.2 y etiquetas de peligro de las clases 1 a 9.
+- **Regla de los 1000 puntos (ADR 1.1.3.6)**: cálculo de exenciones con selección de grupo de embalaje, cantidades en litros o kilogramos y desglose por categoría de transporte.
 - **Baremo sancionador** local, versión 7.3, con 1.066 infracciones, filtros por índice y gravedad, búsqueda textual y detalle normativo.
 - **Inspección de Transporte Escolar**: consulta de autobuses por matrícula, importación de datos del REAT, cálculo de antigüedad al 1 de septiembre y guía rápida del Real Decreto 443/2001.
-- **Acerca de** con información legal, versión y enlaces a las fuentes de datos.
+- **Inspección interna** con lectura del DNIe por NFC.
+- **Acerca de** con información legal, referencias normativas y enlaces a las fuentes de datos.
 
 ## Tecnologías
 
@@ -77,9 +79,14 @@ RELEASE_KEY_ALIAS=consulta-reat-key
 ```
 app/src/main/java/com/oscar/consultareat/
 ├── data/
+│   ├── adr/           # Base SQLite ADR 2025, repositorio y modelos
 │   ├── api/          # Cliente y mapper de la API NAP
 │   ├── cache/        # Historial local (DataStore)
 │   ├── client/       # Cliente del flujo web del REAT (OkHttp)
+│   ├── datasource/   # Orígenes de datos de inspección interna
+│   ├── pdf/          # Generación de documentos PDF
+│   ├── print/        # Impresión Bluetooth (Zebra)
+│   ├── repository/   # Almacenamiento de impresoras
 │   └── parser/       # Parser del HTML del REAT (jsoup)
 ├── domain/           # Modelos de dominio y comandos de consulta
 ├── ui/
@@ -88,7 +95,8 @@ app/src/main/java/com/oscar/consultareat/
 │   ├── resultado/    # Resultados en tarjetas con estado
 │   ├── historial/    # Historial de consultas
 │   ├── baremo/       # Consulta local del baremo sancionador
-│   ├── inspeccion/    # Inspección de transporte escolar (RD 443/2001)
+│   ├── adr/          # Consulta ONU, panel naranja y 1000 puntos
+│   ├── inspeccion/    # Inspección escolar (RD 443/2001) e interna (DNIe NFC)
 │   ├── acercade/     # Información legal y fuentes
 │   ├── theme/        # Tema y paleta de colores
 │   └── viewmodel/    # ConsultaViewModel + UiState
@@ -98,15 +106,15 @@ app/src/main/java/com/oscar/consultareat/
 └── ConsultaREATApplication.kt
 ```
 
-La base de datos `BasermoSancionador.db` se incluye en `app/src/main/assets/` y se copia al almacenamiento privado de la aplicación en el primer acceso al baremo. La consulta admite filtros por índice y gravedad, búsqueda sin distinguir mayúsculas ni acentos y detalle completo de cada infracción.
-
-La documentación de referencia para la inspección de transporte escolar se incluye en `docs/INSPECCION_TRANSPORTE_ESCOLAR.md`. El codificado DGT entregado para el proyecto está disponible en `docs/CODIFICADO-DGT-20-MAYO-2026.pdf`.
+Las bases de datos `BasermoSancionador.db` y `adr_2025.db` se incluyen en `app/src/main/assets/` y se copian al almacenamiento privado de la aplicación en el primer acceso. La base ADR se regenera con `create_adr_db.py`.
 
 ## Documentación técnica
 
 - [Arquitectura](docs/ARQUITECTURA.md): capas, flujo de datos, navegación y decisiones de diseño.
 - [API y fuentes](docs/API_FUENTES.md): detalle del flujo web del REAT y de la API NAP.
 - [Inspección de transporte escolar](docs/INSPECCION_TRANSPORTE_ESCOLAR.md): flujo, cálculo de antigüedad, checklist y correspondencias sancionadoras.
+- [Módulo ADR 2025](docs/ADR_CONSULTA.md): fuentes de estudio, base de datos, panel naranja, etiquetas y regla de los 1000 puntos.
+- [Historial de cambios](CHANGELOG.md).
 
 ## Fuentes de datos
 
