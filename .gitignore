@@ -12,5 +12,6 @@
 local.properties
 *.keystore
 *.jks
+/dist/
 screenshot*.png
 /Skills/

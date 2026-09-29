@@ -4,6 +4,11 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +48,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -57,11 +63,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -180,6 +188,11 @@ fun InspeccionTransEscolarScreen(
     var unidadActa by remember { mutableStateOf("") }
     var lugarActa by remember { mutableStateOf("") }
     var errorDatosActa by remember { mutableStateOf<String?>(null) }
+    var opcionTransporte by remember { mutableStateOf<Char?>(null) }
+    var datosOcupacion by remember { mutableStateOf<Pair<Int, Int>?>(null) }
+    var aplicaRd443 by remember { mutableStateOf(false) }
+    var mostrarModalPlazas by remember { mutableStateOf(false) }
+    var mostrarAlertaEscolar by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
     val preferenciasActa = remember(context) {
@@ -242,6 +255,21 @@ fun InspeccionTransEscolarScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     CabeceraInspeccion()
+                    TarjetaTipoTransporte(
+                        opcionSeleccionada = opcionTransporte,
+                        aplicaRd443 = aplicaRd443,
+                        datosOcupacion = datosOcupacion,
+                        onOpcionSeleccionada = { opcion ->
+                            opcionTransporte = opcion
+                            when (opcion) {
+                                'A' -> {
+                                    aplicaRd443 = true
+                                    datosOcupacion = null
+                                }
+                                else -> mostrarModalPlazas = true
+                            }
+                        }
+                    )
                     ConsultaMatricula(
                         matricula = matricula,
                         onMatriculaChange = { matricula = it.uppercase() },
@@ -370,6 +398,58 @@ fun InspeccionTransEscolarScreen(
 
             },
             confirmButton = { TextButton(onClick = { avisos = emptyList() }) { Text("Aceptar") } }
+        )
+    }
+
+    if (mostrarModalPlazas && opcionTransporte in listOf('B', 'C', 'D')) {
+        DialogDatosOcupacion(
+            opcion = opcionTransporte!!,
+            onConfirmar = { plazas, menores ->
+                datosOcupacion = plazas to menores
+                aplicaRd443 = when (opcionTransporte) {
+                    'B' -> menores * 4 >= plazas * 2
+                    'C' -> menores * 4 >= plazas * 3
+                    'D' -> menores * 3 >= plazas
+                    else -> false
+                }
+                mostrarModalPlazas = false
+                if (aplicaRd443) mostrarAlertaEscolar = true
+            },
+            onCancelar = { mostrarModalPlazas = false }
+        )
+    }
+
+    if (mostrarAlertaEscolar) {
+        AlertDialog(
+            onDismissRequest = { mostrarAlertaEscolar = false },
+            title = {
+                Text(
+                    "TRANSPORTE ESCOLAR Y DE MENORES",
+                    color = Color(0xFFC62828),
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    when (opcionTransporte) {
+                        'B' -> "La mitad o más de las plazas del vehículo están reservadas para viajeros " +
+                            "menores de 16 años: la expedición se considera transporte escolar y de menores " +
+                            "a efectos del Real Decreto 443/2001 (art. 1.b)."
+                        'C' -> "Tres cuartas partes o más de los viajeros son menores de 16 años: el servicio " +
+                            "se considera transporte escolar y de menores a efectos del Real Decreto 443/2001 " +
+                            "(art. 1.c)."
+                        'D' -> "Al menos un tercio de los viajeros son menores de 16 años: el transporte se " +
+                            "considera escolar y de menores a efectos del Real Decreto 443/2001 (art. 1.d)."
+                        else -> "Servicio de transporte escolar y de menores a efectos del Real Decreto 443/2001."
+                    } + " Deben cumplirse sus condiciones de seguridad: distintivo V-10, ITV específica, " +
+                        "acompañante obligatorio en su caso, cinturones, salidas de emergencia y " +
+                        "limitaciones de velocidad y duración del viaje.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = { mostrarAlertaEscolar = false }) { Text("Aceptar") }
+            }
         )
     }
 
@@ -757,5 +837,148 @@ private fun incidenciaPara(punto: PuntoInspeccion): IncidenciaDgt = when (punto.
         "Normativa específica del transporte escolar",
         "Consultar precepto sancionador DGT",
         "Concretar los hechos observados."
+    )
+}
+
+private val OPCIONES_TRANSPORTE = listOf(
+    'A' to "Trans. P. Regular de uso especial escolar",
+    'B' to "Trans. P. Regular de uso general",
+    'C' to "Trans. P. Discrecional",
+    'D' to "Trans. Privado complementario viajeros"
+)
+
+@Composable
+private fun TarjetaTipoTransporte(
+    opcionSeleccionada: Char?,
+    aplicaRd443: Boolean,
+    datosOcupacion: Pair<Int, Int>?,
+    onOpcionSeleccionada: (Char) -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                "Tipo de transporte",
+                fontWeight = FontWeight.Bold,
+                color = AzulInstitucional
+            )
+            OPCIONES_TRANSPORTE.forEach { (letra, etiqueta) ->
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onOpcionSeleccionada(letra) }
+                        .padding(vertical = 2.dp)
+                ) {
+                    RadioButton(
+                        selected = opcionSeleccionada == letra,
+                        onClick = { onOpcionSeleccionada(letra) }
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        "$etiqueta (Op. $letra)",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            datosOcupacion?.let { (plazas, menores) ->
+                Text(
+                    "Plazas: $plazas · Menores de 16 años: $menores",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextoSecundario
+                )
+            }
+            if (aplicaRd443) {
+                TextoTransporteEscolarAnimado()
+            }
+        }
+    }
+}
+
+@Composable
+private fun TextoTransporteEscolarAnimado() {
+    val transicion = rememberInfiniteTransition(label = "transporteEscolar")
+    val fraccion by transicion.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(600),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "parpadeoTransporteEscolar"
+    )
+    val colorAnimado = lerp(Color(0xFFB71C1C), Color(0xFFFF1744), fraccion)
+    Text(
+        "TRANSPORTE ESCOLAR",
+        fontSize = 20.sp,
+        fontWeight = FontWeight.Bold,
+        color = colorAnimado,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 6.dp)
+    )
+}
+
+@Composable
+private fun DialogDatosOcupacion(
+    opcion: Char,
+    onConfirmar: (Int, Int) -> Unit,
+    onCancelar: () -> Unit
+) {
+    var plazas by remember { mutableStateOf("") }
+    var menores by remember { mutableStateOf("") }
+    val plazasNum = plazas.toIntOrNull()
+    val menoresNum = menores.toIntOrNull()
+
+    AlertDialog(
+        onDismissRequest = onCancelar,
+        title = { Text("Ocupación del vehículo (Op. $opcion)") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(
+                    when (opcion) {
+                        'B' -> "Aplica el RD 443/2001 si la mitad o más de las plazas del vehículo están " +
+                            "reservadas para viajeros menores de 16 años (art. 1.b)."
+                        'C' -> "Aplica el RD 443/2001 si tres cuartas partes o más de los viajeros son " +
+                            "menores de 16 años (art. 1.c)."
+                        else -> "Aplica el RD 443/2001 si un tercio o más de los viajeros son menores de " +
+                            "16 años (art. 1.d)."
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    color = TextoSecundario
+                )
+                OutlinedTextField(
+                    value = plazas,
+                    onValueChange = { plazas = it.filter { c -> c.isDigit() }.take(3) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    label = { Text("N.º de plazas del vehículo") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    shape = RoundedCornerShape(8.dp)
+                )
+                OutlinedTextField(
+                    value = menores,
+                    onValueChange = { menores = it.filter { c -> c.isDigit() }.take(3) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    label = { Text("Pasajeros menores de 16 años") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    shape = RoundedCornerShape(8.dp)
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirmar(plazasNum ?: 0, menoresNum ?: 0) },
+                enabled = (plazasNum ?: 0) > 0 && menoresNum != null
+            ) { Text("Comprobar") }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancelar) { Text("Cancelar") }
+        }
     )
 }
