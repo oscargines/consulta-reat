@@ -1,0 +1,90 @@
+package com.oscar.consultareat.domain
+
+enum class EstadoInspeccion {
+    SI,
+    NO,
+    PENDIENTE
+}
+
+data class InspeccionConcepto(
+    val id: String,
+    val categoria: String,
+    val texto: String,
+    val referencia: String? = null,
+    val estado: EstadoInspeccion = EstadoInspeccion.PENDIENTE
+)
+
+data class InspeccionInternaData(
+    val lugar: String = "",
+    val fecha: String = "",
+    val hora: String = "",
+    val destacamento: String = "",
+    val matricula: String = "",
+    val marcaModelo: String = "",
+    val titular: String = "",
+    val nifCif: String = "",
+    val domicilio: String = "",
+    val localidad: String = "",
+    val codigoPostal: String = "",
+    val provincia: String = "",
+    val tarjetaTransportes: String = "",
+    val clase: String = "",
+    val plazas: String = "",
+    val mma: String = "",
+    val conductor: String = "",
+    val dniNie: String = "",
+    val entidadOrganizadora: String = "",
+    val entidadCif: String = "",
+    val entidadDireccion: String = "",
+    val numeroAutorizacion: String = "",
+    val kmOrigen: String = "",
+    val origen: String = "",
+    val alumnos: String = "",
+    val destino: String = "",
+    val centroEducativo: String = "",
+    val conceptos: List<InspeccionConcepto> = emptyList()
+)
+
+val conceptosInspeccionInterna = listOf(
+    InspeccionConcepto("aut_vd", "AUTORIZACIONES", "Autorización de transportes VD referida a la empresa (público)", "Art. 140.9 (KA01.01)"),
+    InspeccionConcepto("aut_vpc", "AUTORIZACIONES", "Autorización de transportes VPC referida a la empresa (privado)", "Art. 141.13 (PA01.01)"),
+    InspeccionConcepto("aut_escolar", "AUTORIZACIONES", "Autorización de transporte regular de uso especial (escolares)", "KA01.08"),
+    InspeccionConcepto("colaboracion", "AUTORIZACIONES", "Colaboración entre transportistas acreditada correctamente", "KA01.04 / KA0302"),
+    InspeccionConcepto("libro_ruta", "DOCUMENTOS DE CONTROL", "Libro de ruta y libro de reclamaciones cuando resulten obligatorios"),
+    InspeccionConcepto("permiso_itv", "VEHICULO", "Permiso de circulación y tarjeta ITV"),
+    InspeccionConcepto("seguro", "VEHICULO", "Seguro del vehículo y seguro de viajeros con cobertura exigible", "KI01.01"),
+    InspeccionConcepto("aptitud_escolar", "VEHICULO", "Aptitud para transporte escolar reseñada en tarjeta ITV"),
+    InspeccionConcepto("antiguedad", "VEHICULO", "Antigüedad dentro de los límites del transporte escolar", "KF01.01"),
+    InspeccionConcepto("permiso_conduccion", "CONDUCTOR", "Permiso de conducción de clase correspondiente"),
+    InspeccionConcepto("cap", "CONDUCTOR", "CAP o certificado de conductor", "KJ01.01 / KJ02.01"),
+    InspeccionConcepto("acompanante", "ACOMPAÑANTE", "Acompañante obligatorio presente y acreditado", "KB01.01"),
+    InspeccionConcepto("plaza_menor", "ACOMPAÑANTE", "Cada menor dispone de su propia plaza o asiento", "KG01.01"),
+    InspeccionConcepto("duracion", "SEGURIDAD VIAL", "Duración del viaje dentro del límite aplicable", "KH02.01"),
+    InspeccionConcepto("v10", "SEGURIDAD VIAL", "Distintivo de transporte escolar V-10 colocado"),
+    InspeccionConcepto("tacografo", "SEGURIDAD VIAL", "Tacógrafo cuando resulte exigible"),
+    InspeccionConcepto("contratacion", "SEGURIDAD VIAL", "Transportista debidamente autorizado por la entidad contratante"),
+    InspeccionConcepto("pantalla", "CONDICIONES TÉCNICAS", "Pantalla transparente de protección del conductor", "Art. 4.2.1ª"),
+    InspeccionConcepto("puertas", "CONDICIONES TÉCNICAS", "Apertura de seguridad y protección de mandos en puertas", "Art. 4.2.2ª"),
+    InspeccionConcepto("protecciones_asientos", "CONDICIONES TÉCNICAS", "Protecciones en asientos enfrentados o sin respaldo", "Art. 4.2.4ª"),
+    InspeccionConcepto("cinturones", "CONDICIONES TÉCNICAS", "Cinturones de seguridad en asientos exigibles", "Art. 4.2.4ª"),
+    InspeccionConcepto("emergencia_luminosa", "CONDICIONES TÉCNICAS", "Dispositivo luminoso de señal de emergencia", "Art. 4.2.6ª"),
+    InspeccionConcepto("uso_emergencia", "CONDICIONES TÉCNICAS", "Uso del dispositivo luminoso durante acceso y abandono", "Art. 4.2.6ª"),
+    InspeccionConcepto("martillos", "CONDICIONES TÉCNICAS", "Martillos rompecristales u otros dispositivos de emergencia", "Art. 4.2.7ª"),
+    InspeccionConcepto("piso", "CONDICIONES TÉCNICAS", "Piso del vehículo no deslizante", "Art. 4.2.10ª"),
+    InspeccionConcepto("asideros", "CONDICIONES TÉCNICAS", "Barras y asideros accesibles desde el exterior", "Art. 4.2.10ª"),
+    InspeccionConcepto("ayudas_motrices", "CONDICIONES TÉCNICAS", "Ayudas técnicas para alumnos con afectaciones motóricas", "Art. 4.2.10ª"),
+    InspeccionConcepto("bordes_escalones", "CONDICIONES TÉCNICAS", "Bordes de escalones de colores vivos", "Art. 4.2.11ª"),
+    InspeccionConcepto("opticos", "CONDICIONES TÉCNICAS", "Dispositivos ópticos para detectar viajeros en puertas", "Art. 4.2.18ª"),
+    InspeccionConcepto("extintor", "CONDICIONES TÉCNICAS", "Extintores conforme a plazas y clase exigida", "Art. 4.2.27ª"),
+    InspeccionConcepto("mando_seguridad", "CONDICIONES TÉCNICAS", "Mando central de seguridad próximo al conductor", "Art. 4.2.24ª"),
+    InspeccionConcepto("botiquin", "CONDICIONES TÉCNICAS", "Botiquín de primeros auxilios", "Art. 4.2.27ª"),
+    InspeccionConcepto("salidas", "CONDICIONES TÉCNICAS", "Salidas de emergencia operativas y señalizadas", "Art. 4.2.29ª / 4.2.31ª"),
+    InspeccionConcepto("fluorescentes", "MATRICULADOS DESDE 2002", "Señalización fluorescente interior en salidas de emergencia", "Art. 4.4.2ª"),
+    InspeccionConcepto("alarma_marcha_atras", "MATRICULADOS DESDE 2002", "Dispositivo acústico sincronizado con marcha atrás", "Art. 4.4.6ª"),
+    InspeccionConcepto("espejos", "MATRICULADOS DESDE 2002", "Espejos para ver la zona frontal exterior inferior", "Art. 4.4.5ª"),
+    InspeccionConcepto("homologacion", "MATRICULADOS DESDE 2002", "Asientos, anclajes y apoyacabezas homologados", "Art. 4.4.3ª"),
+    InspeccionConcepto("estabilizacion", "MATRICULADOS DESDE 2002", "Dispositivo de estabilización de velocidad cuando proceda", "Art. 4.4.1ª"),
+    InspeccionConcepto("m1_extintor", "CATEGORIA M1", "Extintor clase 5/21B"),
+    InspeccionConcepto("m1_plaza_conductor", "CATEGORIA M1", "Plaza contigua al conductor no ocupada por menores de 12 años", "Art. 4.3.1ª"),
+    InspeccionConcepto("m1_cinturon", "CATEGORIA M1", "Menores entre 5 y 11 años con cinturón de 3 puntos y elevador", "Art. 4.3.3ª")
+)

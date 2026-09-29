@@ -1,0 +1,19 @@
+{
+  "documento": {
+    "encabezado": {
+      "titulo": "ACTA DE INSPECCIÓN DE VEHÍCULO DE TRANSPORTE ESCOLAR Y DE MENORES",
+      "subtitulo": "Real Decreto 443/2001, de 27 de abril, sobre condiciones de seguridad en el transporte escolar y de menores."
+    },
+    "cuerpo": {
+      "titulo": "JUSTIFICANTE DE INSPECCIÓN",
+      "parrafos": [
+        "Se acredita que en la fecha [[fecha]], hora [[hora]] indicados en la presente acta se ha practicado inspección.\nLugar: [[lugar]]\nLa inspección se realiza sobre las condiciones de seguridad del vehículo matrícula [[matricula]], disponiendo de número de autorización de transporte número [[numero_autorizacion]], perteneciente a la empresa [[empresa]], afecto al servicio de transporte escolar y de menores, conforme al Real Decreto 443/2001, de 27 de abril, con el resultado que en aquélla se recoge.",
+        "Se entrega copia al conductor o representante de la empresa transportista. La firma acredita únicamente la recepción de la copia y no implica conformidad con su contenido.",
+        "Este documento no sustituye a la inspección técnica en estación ITV prevista en el artículo 6 del citado Real Decreto ni a la tarjeta ITV en vigor."
+      ],
+      "cierre": "En [[lugar]]\na [[dia]] de [[mes]] de [[anio]]",
+      "tip": "TIP Guardia Civil realiza la inspección: [[tip]]",
+      "unidad": "Unidad: [[unidad]]"
+    }
+  }
+}
