@@ -93,7 +93,7 @@ fun SplashScreen(onTimeout: () -> Unit) {
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "REAT",
+                text = "Transportes",
                 fontSize = 48.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Consulta REAT</string>
+    <string name="app_name">Consulta Transportes</string>
     <string name="label_consulta">Introduzca el dato a consultar</string>
     <string name="label_tipo_consulta">Tipo de consulta</string>
     <string name="label_tipo_identificacion">Tipo de identificación</string>
@@ -65,5 +65,66 @@
     <string name="bluetooth_printer_select_one">Debes seleccionar una impresora encontrada.</string>
     <string name="bluetooth_printer_select_saved_one">Debes seleccionar una impresora guardada.</string>
     <string name="bluetooth_printer_discovered_devices">Dispositivos encontrados</string>
+    <string name="bluetooth_printer_scanning_title">Buscando impresoras</string>
     <string name="accept_action">Aceptar</string>
+
+    <string name="printing_acta_title">Imprimiendo acta</string>
+    <string name="printing_acta_connecting">Conectando con la impresora...</string>
+    <string name="printing_acta_sending">Enviando formato...</string>
+    <string name="printing_acta_completed">Impresión completada.</string>
+    <string name="printing_acta_failed">No se pudo imprimir: %1$s</string>
+
+    <!-- NFC Reading Strings -->
+    <string name="can_dialog_title">Introduce el CAN</string>
+    <string name="can_dialog_message">Introduce los 6 dígitos del CAN que aparecen en la esquina inferior derecha del DNI</string>
+    <string name="can_code_label">CAN</string>
+    <string name="can_dialog_confirm">Continuar</string>
+    <string name="can_invalid_message">El CAN debe ser de 6 dígitos</string>
+    <string name="nfc_scan_dialog_title">Leer conductor por NFC</string>
+    <string name="nfc_waiting_tag_message">Acerca el DNI al dispositivo...</string>
+    <string name="nfc_reading_progress_title">Leyendo datos...</string>
+    <string name="nfc_reading_progress_message">Mantén el DNI cerca del dispositivo</string>
+    <string name="nfc_read_error_title">Error de lectura NFC</string>
+    <string name="nfc_missing_library_message">Faltan librerías NFC. Reinstala la aplicación.</string>
+    <string name="cancel_action">Cancelar</string>
+    <string name="retry_action">Reintentar</string>
+
+    <!-- Inspección Interna Strings -->
+    <string name="inspeccion_interna_title">Hoja interna de inspección</string>
+    <string name="section_datos_generales">Datos generales</string>
+    <string name="section_vehiculo">Vehículo y titular</string>
+    <string name="section_conductor">Conductor</string>
+    <string name="section_servicio">Servicio</string>
+    <string name="section_conceptos">Conceptos de inspección</string>
+    <string name="field_lugar">Lugar de la inspección</string>
+    <string name="field_fecha">Fecha</string>
+    <string name="field_hora">Hora</string>
+    <string name="field_destacamento">Destacamento</string>
+    <string name="field_matricula">Matrícula</string>
+    <string name="field_marca_modelo">Marca y modelo</string>
+    <string name="field_titular">Titular</string>
+    <string name="field_nif_cif">NIF/CIF</string>
+    <string name="field_domicilio">Domicilio</string>
+    <string name="field_localidad">Localidad</string>
+    <string name="field_codigo_postal">Código postal</string>
+    <string name="field_provincia">Provincia</string>
+    <string name="field_tarjeta_transportes">Nº tarjeta transportes</string>
+    <string name="field_clase">Clase</string>
+    <string name="field_plazas">Nº plazas</string>
+    <string name="field_mma">MMA</string>
+    <string name="field_conductor">Nombre y apellidos</string>
+    <string name="field_dni_nie">DNI/NIE</string>
+    <string name="btn_leer_conductor_nfc">Leer conductor por NFC</string>
+    <string name="field_entidad_organizadora">Entidad organizadora / contratante</string>
+    <string name="field_entidad_cif">CIF</string>
+    <string name="field_entidad_direccion">Dirección</string>
+    <string name="field_numero_autorizacion">Número de autorización específica</string>
+    <string name="field_km_origen">KM origen</string>
+    <string name="field_origen">Origen</string>
+    <string name="field_alumnos">Nº alumnos</string>
+    <string name="field_destino">Destino</string>
+    <string name="field_centro_educativo">Centro educativo</string>
+    <string name="btn_generar_pdf">Generar y compartir PDF</string>
+    <string name="error_falta_lugar">El lugar de la inspección es necesario para generar el PDF.</string>
+    <string name="error_dato_pendiente">Dato pendiente</string>
 </resources>

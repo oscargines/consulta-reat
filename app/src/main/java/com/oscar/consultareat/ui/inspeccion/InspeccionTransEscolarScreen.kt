@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Print
+import com.oscar.consultareat.data.print.PrintStatus
 import com.oscar.consultareat.data.print.printActaInspeccion
 import com.oscar.consultareat.data.repository.BluetoothPrinterStorage
 import com.oscar.consultareat.domain.ActaInspeccionData
@@ -41,6 +42,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -56,17 +58,21 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.oscar.consultareat.R
 import com.oscar.consultareat.domain.ConsultaRequest
 import com.oscar.consultareat.domain.ConsultaResultado
 import com.oscar.consultareat.domain.DatoItem
+import com.oscar.consultareat.data.cache.HistorialItem
 import com.oscar.consultareat.domain.TipoConsulta
 import com.oscar.consultareat.domain.TipoIdentificacion
+import com.oscar.consultareat.domain.conceptosInspeccionInterna
 import com.oscar.consultareat.ui.consulta.CapturaMatriculaScreen
 import com.oscar.consultareat.ui.consulta.CaptchaWebView
 import com.oscar.consultareat.ui.theme.AzulClaro
@@ -97,32 +103,53 @@ private data class IncidenciaDgt(
     val observaciones: String
 )
 
-private val puntos = listOf(
-    PuntoInspeccion("autorizacion", "Art. 2", "Autorización administrativa del servicio disponible y vigente", "KA01.08"),
-    PuntoInspeccion("antiguedad", "Art. 3", "Antigüedad del vehículo dentro del límite permitido", "KF01.01"),
-    PuntoInspeccion("categoria", "Art. 4.1", "Vehículo homologado como categoría M", "VEH012.9"),
-    PuntoInspeccion("pantalla", "Art. 4.2.1", "Pantalla de protección del puesto del conductor", "VEH012.9"),
-    PuntoInspeccion("puertas", "Art. 4.2.2", "Puertas de servicio y apertura de emergencia protegida", "VEH012.9"),
-    PuntoInspeccion("ventanas", "Art. 4.2.3", "Abertura de ventanas limitada al tercio superior", "VEH012.9"),
-    PuntoInspeccion("asientos", "Art. 4.2.4", "Protecciones en asientos enfrentados o sin respaldo suficiente", "VEH012.9"),
-    PuntoInspeccion("emergencia", "Art. 4.2.6", "Señal de emergencia luminosa operativa en las paradas", "VEH018.1"),
-    PuntoInspeccion("martillos", "Art. 4.2.7", "Martillos rompecristales protegidos y disponibles", "VEH012.9"),
-    PuntoInspeccion("plazas", "Art. 4.2.12", "Cada menor dispone de su propia plaza o asiento", "CIR009.5E"),
-    PuntoInspeccion("tacografo", "Art. 4.2.13", "Tacógrafo instalado cuando resulte exigible", "VEH011.15"),
-    PuntoInspeccion("limitador", "Art. 4.2.14", "Limitador de velocidad cuando resulte exigible", "VEH011.15"),
-    PuntoInspeccion("frenos", "Art. 4.2.15", "Frenos y ABS en las condiciones exigibles", "VEH012.8"),
-    PuntoInspeccion("extintor", "Art. 4.2.27", "Extintor y botiquín de primeros auxilios", "VEH019.1"),
-    PuntoInspeccion("salidas", "Art. 4.2.29-31", "Puertas, trampillas y salidas de emergencia operativas y señalizadas", "VEH012.9"),
-    PuntoInspeccion("v10", "Art. 5", "Distintivo de transporte escolar V-10 visible", "VEH018.1"),
-    PuntoInspeccion("itv", "Art. 6", "ITV específica favorable y en vigor", "VEH010.1"),
-    PuntoInspeccion("conductor", "Art. 7", "Conductor con los permisos y requisitos exigibles", "KJ01.01"),
-    PuntoInspeccion("acompanante", "Art. 8", "Acompañante presente cuando sea obligatorio", "KB01.01"),
-    PuntoInspeccion("velocidad", "Art. 9", "Velocidad máxima respetada", "CIR048.1"),
-    PuntoInspeccion("paradas", "Art. 10", "Itinerario, paradas y acceso de menores seguros", "CIR011.1"),
-    PuntoInspeccion("duracion", "Art. 11", "Duración máxima del viaje y descansos respetados", "CIR120.1"),
-    PuntoInspeccion("seguro", "Art. 12", "Responsabilidad civil ilimitada cubierta", "SOA002.1"),
-    PuntoInspeccion("documentacion", "Art. 13", "Entidad organizadora ha exigido la documentación", "KC03.01")
-)
+private val puntos = conceptosInspeccionInterna.map { concepto ->
+    val codigoDgt = when (concepto.id) {
+        "aut_vd" -> "KA01.01"
+        "aut_vpc" -> "PA01.01"
+        "aut_escolar" -> "KA01.08"
+        "colaboracion" -> "KA01.04"
+        "libro_ruta" -> "KC03.01"
+        "permiso_itv" -> "VEH010.1"
+        "seguro" -> "SOA002.1"
+        "aptitud_escolar" -> "VEH012.9"
+        "antiguedad" -> "KF01.01"
+        "permiso_conduccion" -> "KJ01.01"
+        "cap" -> "KJ01.01"
+        "acompanante" -> "KB01.01"
+        "plaza_menor" -> "CIR009.5E"
+        "duracion" -> "CIR120.1"
+        "v10" -> "VEH018.1"
+        "tacografo" -> "VEH011.15"
+        "contratacion" -> "KC03.01"
+        "pantalla" -> "VEH012.9"
+        "puertas" -> "VEH012.9"
+        "protecciones_asientos" -> "VEH012.9"
+        "cinturones" -> "VEH012.9"
+        "emergencia_luminosa" -> "VEH018.1"
+        "uso_emergencia" -> "VEH018.1"
+        "martillos" -> "VEH012.9"
+        "piso" -> "VEH012.9"
+        "asideros" -> "VEH012.9"
+        "ayudas_motrices" -> "VEH012.9"
+        "bordes_escalones" -> "VEH012.9"
+        "opticos" -> "VEH012.9"
+        "extintor" -> "VEH019.1"
+        "mando_seguridad" -> "VEH012.9"
+        "botiquin" -> "VEH019.1"
+        "salidas" -> "VEH012.9"
+        "fluorescentes" -> "VEH012.9"
+        "alarma_marcha_atras" -> "VEH012.9"
+        "espejos" -> "VEH012.9"
+        "homologacion" -> "VEH012.9"
+        "estabilizacion" -> "VEH012.9"
+        "m1_extintor" -> "VEH019.1"
+        "m1_plaza_conductor" -> "VEH012.9"
+        "m1_cinturon" -> "VEH012.9"
+        else -> "VEH012.9"
+    }
+    PuntoInspeccion(concepto.id, concepto.referencia ?: "Art. gen.", concepto.texto, codigoDgt)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -132,6 +159,9 @@ fun InspeccionTransEscolarScreen(
     onResultadoHtmlObtenido: (String, TipoConsulta) -> Unit,
     onBack: () -> Unit,
     onAbrirConfiguracionImpresora: () -> Unit,
+    onAbrirInspeccionInterna: () -> Unit,
+    historial: List<HistorialItem>,
+    onImportarHistorial: (HistorialItem) -> Unit,
     onImprimirActa: (ConsultaResultado) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -142,6 +172,19 @@ fun InspeccionTransEscolarScreen(
     var incidencias by remember { mutableStateOf<List<IncidenciaDgt>>(emptyList()) }
     var incidenciaActual by remember { mutableStateOf(0) }
     var mostrarAvisoImpresora by remember { mutableStateOf(false) }
+    var printStatus by remember { mutableStateOf<PrintStatus?>(null) }
+    var mostrarDialogoImpresion by remember { mutableStateOf(false) }
+    var mostrarDatosActa by remember { mutableStateOf(false) }
+    var mostrarHistorial by remember { mutableStateOf(false) }
+    var tipActa by remember { mutableStateOf("") }
+    var unidadActa by remember { mutableStateOf("") }
+    var lugarActa by remember { mutableStateOf("") }
+    var errorDatosActa by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+
+    val preferenciasActa = remember(context) {
+        context.getSharedPreferences("acta_inspeccion_preferences", android.content.Context.MODE_PRIVATE)
+    }
 
     LaunchedEffect(uiState) {
         avisos = when (val state = uiState) {
@@ -150,12 +193,15 @@ fun InspeccionTransEscolarScreen(
         }
     }
 
-    val context = LocalContext.current
     val permisoCamara = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         if (it) mostrandoScanner = true
     }
 
     val puedeImprimir = uiState is UiState.Success
+    val resultadoSuccess = (uiState as? UiState.Success)?.resultado
+    val hayResultado = resultadoSuccess != null
+    val storage = remember(context) { BluetoothPrinterStorage(context) }
+    val hayImpresora = storage.hasDefaultPrinter()
 
     Scaffold(
         modifier = modifier,
@@ -213,7 +259,8 @@ fun InspeccionTransEscolarScreen(
                                 mostrandoScanner = true
                             } else permisoCamara.launch(Manifest.permission.CAMERA)
                         },
-                        cargando = uiState is UiState.Loading
+                        cargando = uiState is UiState.Loading,
+                        onImportarHistorial = { mostrarHistorial = true }
                     )
                     if (uiState is UiState.Success) DatosAutobus(uiState.resultado)
                     Text(
@@ -251,30 +298,32 @@ fun InspeccionTransEscolarScreen(
                         modifier = Modifier.fillMaxWidth().height(52.dp),
                         shape = RoundedCornerShape(14.dp)
                     ) { Text("Comprobar") }
+                    OutlinedButton(
+                        onClick = onAbrirInspeccionInterna,
+                        modifier = Modifier.fillMaxWidth()
+                    ) { Text("Abrir hoja interna de inspección") }
                     Spacer(Modifier.height(8.dp))
                     // Botón imprimir siempre visible; habilitado solo con éxito y impresora configurada
-                    val resultadoSuccess = (uiState as? UiState.Success)?.resultado
-                    val hayResultado = resultadoSuccess != null
-                    val storage = BluetoothPrinterStorage(context)
-                    val hayImpresora = storage.hasDefaultPrinter()
                     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Button(
                             onClick = {
                                 if (hayResultado && hayImpresora) {
-                                    val defaultPrinter = storage.getDefaultPrinter()
-                                    defaultPrinter?.let { printer ->
-                                        val actaData = ActaInspeccionData(
-                                            matricula = resultadoSuccess.matricula ?: "",
-                                            empresaTitular = resultadoSuccess.empresaTitular ?: "",
-                                            numeroAutorizacion = resultadoSuccess.numeroAutorizacion ?: ""
-                                        )
-                                        printActaInspeccion(context, printer.mac, actaData)
-                                    }
+                                    tipActa = preferenciasActa.getString("tip", "").orEmpty()
+                                    unidadActa = preferenciasActa.getString(
+                                        "unidad",
+                                        preferenciasActa.getString("destacamento", "")
+                                    ).orEmpty()
+                                    lugarActa = preferenciasActa.getString(
+                                        "lugar",
+                                        "Estacionamiento Colegio Público de Llanes"
+                                    ).orEmpty()
+                                    errorDatosActa = null
+                                    mostrarDatosActa = true
                                 } else if (!hayImpresora) {
                                     mostrarAvisoImpresora = true
                                 }
                             },
-                            enabled = hayResultado && hayImpresora,
+                            enabled = hayResultado && printStatus !is PrintStatus.Connecting && printStatus !is PrintStatus.Sending,
                             modifier = Modifier.fillMaxWidth().height(52.dp),
                             shape = RoundedCornerShape(14.dp),
                             colors = androidx.compose.material3.ButtonDefaults.buttonColors(
@@ -318,8 +367,46 @@ fun InspeccionTransEscolarScreen(
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     avisos.forEach { aviso -> Text(aviso) }
                 }
+
             },
             confirmButton = { TextButton(onClick = { avisos = emptyList() }) { Text("Aceptar") } }
+        )
+    }
+
+    if (mostrarHistorial) {
+        AlertDialog(
+            onDismissRequest = { mostrarHistorial = false },
+            title = { Text("Importar desde historial") },
+            text = {
+                if (historial.isEmpty()) {
+                    Text("No hay consultas guardadas en el historial.")
+                } else {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                        historial.forEach { item ->
+                            OutlinedButton(
+                                onClick = {
+                                    onImportarHistorial(item)
+                                    matricula = item.resultado.matricula
+                                        ?: buscarDato(item.resultado.vehiculos, "matrícula", "matricula")
+                                        ?: item.valor
+                                    mostrarHistorial = false
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(
+                                    item.resultado.matricula
+                                        ?: buscarDato(item.resultado.vehiculos, "matrícula", "matricula")
+                                        ?: item.valor
+                                )
+                            }
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { mostrarHistorial = false }) { Text("Cancelar") }
+            }
         )
     }
 
@@ -364,6 +451,133 @@ fun InspeccionTransEscolarScreen(
             }
         )
     }
+
+    if (mostrarDatosActa) {
+        AlertDialog(
+            onDismissRequest = { mostrarDatosActa = false },
+            title = { Text("Datos del acta") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    OutlinedTextField(
+                        value = tipActa,
+                        onValueChange = {
+                            tipActa = it.uppercase().filter { char -> char.isLetterOrDigit() }.take(7)
+                            errorDatosActa = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        label = { Text("TIP") },
+                        placeholder = { Text("A12345B") },
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Characters,
+                            keyboardType = KeyboardType.Ascii
+                        )
+                    )
+                    OutlinedTextField(
+                        value = unidadActa,
+                        onValueChange = {
+                            unidadActa = it
+                            errorDatosActa = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        label = { Text("Unidad") }
+                    )
+                    OutlinedTextField(
+                        value = lugarActa,
+                        onValueChange = {
+                            lugarActa = it
+                            errorDatosActa = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = false,
+                        maxLines = 3,
+                        label = { Text("Lugar") }
+                    )
+                    errorDatosActa?.let { error ->
+                        Text(error, color = MaterialTheme.colorScheme.error)
+                    }
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDatosActa = false }) {
+                    Text("Cancelar")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    val tipValido = Regex("^[A-Z][0-9]{5}[A-Z]$").matches(tipActa)
+                    when {
+                        !tipValido -> errorDatosActa = "El TIP debe tener el formato A12345B."
+                        unidadActa.isBlank() -> errorDatosActa = "La Unidad es obligatoria."
+                        lugarActa.isBlank() -> errorDatosActa = "El Lugar es obligatorio."
+                        else -> {
+                            preferenciasActa.edit()
+                                .putString("tip", tipActa)
+                                .putString("unidad", unidadActa.trim())
+                                .putString("lugar", lugarActa.trim())
+                                .apply()
+
+                            val resultado = resultadoSuccess
+                            val defaultPrinter = storage.getDefaultPrinter()
+                            if (resultado != null && defaultPrinter != null) {
+                                val actaData = ActaInspeccionData(
+                                    matricula = resultado.matricula.orEmpty(),
+                                    empresaTitular = resultado.empresaTitular.orEmpty(),
+                                    numeroAutorizacion = resultado.numeroAutorizacion.orEmpty(),
+                                    tip = tipActa,
+                                    unidad = unidadActa.trim(),
+                                    lugar = lugarActa.trim()
+                                )
+                                mostrarDatosActa = false
+                                mostrarDialogoImpresion = true
+                                printActaInspeccion(context, defaultPrinter.mac, actaData) { status ->
+                                    printStatus = status
+                                }
+                            }
+                        }
+                    }
+                }) {
+                    Text("Aceptar")
+                }
+            }
+        )
+    }
+
+    if (mostrarDialogoImpresion) {
+        val status = printStatus
+        val terminado = status is PrintStatus.Completed || status is PrintStatus.Failed
+        AlertDialog(
+            onDismissRequest = { if (terminado) { mostrarDialogoImpresion = false; printStatus = null } },
+            title = { Text(stringResource(R.string.printing_acta_title)) },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (!terminado) CircularProgressIndicator(color = AzulInstitucional)
+                    Text(
+                        when (status) {
+                            PrintStatus.Connecting -> stringResource(R.string.printing_acta_connecting)
+                            PrintStatus.Sending -> stringResource(R.string.printing_acta_sending)
+                            PrintStatus.Completed -> stringResource(R.string.printing_acta_completed)
+                            is PrintStatus.Failed -> stringResource(R.string.printing_acta_failed, status.message)
+                            null -> stringResource(R.string.printing_acta_connecting)
+                        },
+                        color = if (status is PrintStatus.Failed) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            },
+            confirmButton = {
+                if (terminado) {
+                    TextButton(onClick = { mostrarDialogoImpresion = false; printStatus = null }) {
+                        Text("Aceptar")
+                    }
+                }
+            }
+        )
+    }
 }
 
 @Composable
@@ -393,7 +607,8 @@ private fun ConsultaMatricula(
     onMatriculaChange: (String) -> Unit,
     onConsultar: () -> Unit,
     onScan: () -> Unit,
-    cargando: Boolean
+    cargando: Boolean,
+    onImportarHistorial: () -> Unit
 ) {
     Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = Color.White), modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -411,6 +626,13 @@ private fun ConsultaMatricula(
             Button(onClick = onConsultar, enabled = matricula.isNotBlank() && !cargando, modifier = Modifier.fillMaxWidth()) {
                 if (cargando) CircularProgressIndicator(Modifier.size(22.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
                 else Text("Consultar matrícula")
+            }
+            OutlinedButton(
+                onClick = onImportarHistorial,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Importar datos desde el historial")
             }
         }
     }

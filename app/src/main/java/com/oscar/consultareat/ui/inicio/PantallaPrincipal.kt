@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -56,6 +57,7 @@ fun PantallaPrincipal(
     onHistorial: () -> Unit,
     onExcepciones: () -> Unit,
     onInspeccionTransEscolar: () -> Unit,
+    onAdr: () -> Unit,
     onBaremo: () -> Unit,
     onAcercaDe: () -> Unit,
     modifier: Modifier = Modifier
@@ -83,7 +85,7 @@ fun PantallaPrincipal(
         logo?.let { bmp ->
             Image(
                 bitmap = bmp.asImageBitmap(),
-                contentDescription = "Logo Consulta REAT",
+                contentDescription = "Logo Consulta Transportes",
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(bmp.width.toFloat() / bmp.height.toFloat())
@@ -92,7 +94,7 @@ fun PantallaPrincipal(
         }
 
         Text(
-            text = "Consulta REAT",
+            text = "Consulta Transportes",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary,
@@ -136,6 +138,12 @@ fun PantallaPrincipal(
             subtitulo = "Comprueba los requisitos del Real Decreto 443/2001",
             icono = Icons.Filled.DirectionsBus,
             onClick = onInspeccionTransEscolar
+        )
+        TarjetaAcceso(
+            titulo = "ADR",
+            subtitulo = "Consultas ADR y cálculo de exenciones",
+            icono = Icons.Filled.LocalFireDepartment,
+            onClick = onAdr
         )
         TarjetaAcceso(
             titulo = "Acerca de",

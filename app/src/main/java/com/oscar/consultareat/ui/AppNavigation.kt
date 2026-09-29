@@ -55,16 +55,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.oscar.consultareat.data.print.printActaInspeccion
-import com.oscar.consultareat.data.repository.BluetoothPrinterStorage
-import com.oscar.consultareat.domain.ActaInspeccionData
-import com.oscar.consultareat.domain.ConsultaResultado
 import com.oscar.consultareat.RgtRepository
 import com.oscar.consultareat.data.api.ReatApiClient
 import com.oscar.consultareat.data.api.ReatApiConfig
 import com.oscar.consultareat.data.cache.HistorialCache
 import com.oscar.consultareat.data.client.RgtClient
 import com.oscar.consultareat.ui.acercade.AcercaDeScreen
+import com.oscar.consultareat.ui.adr.AdrScreen
+import com.oscar.consultareat.ui.adr.AdrCalculo1000PuntosScreen
+import com.oscar.consultareat.ui.adr.AdrConsultaOnuScreen
 import com.oscar.consultareat.ui.baremo.BaremoScreen
 import com.oscar.consultareat.ui.baremo.BaremoViewModel
 import com.oscar.consultareat.ui.baremo.BaremoViewModelFactory
@@ -72,6 +71,8 @@ import com.oscar.consultareat.ui.consulta.ConsultaScreen
 import com.oscar.consultareat.ui.excepciones.ExcepcionesScreen
 import com.oscar.consultareat.ui.historial.HistorialScreen
 import com.oscar.consultareat.ui.inspeccion.InspeccionTransEscolarScreen
+import com.oscar.consultareat.ui.inspeccion.InspeccionInternaScreen
+import com.oscar.consultareat.LocalNfcReaderController
 import com.oscar.consultareat.ui.impresora.BluetoothPrinterScreen
 import com.oscar.consultareat.ui.inicio.PantallaPrincipal
 import com.oscar.consultareat.ui.resultado.ResultadoScreen
@@ -80,6 +81,7 @@ import com.oscar.consultareat.ui.theme.TextoSecundario
 import com.oscar.consultareat.ui.viewmodel.ConsultaViewModel
 import com.oscar.consultareat.ui.viewmodel.ConsultaViewModelFactory
 import com.oscar.consultareat.ui.viewmodel.UiState
+import java.io.File
 
 private const val TAG = "ConsultaREAT.Navigation"
 
@@ -88,13 +90,21 @@ private const val RUTA_CONSULTAS = "consultas"
 private const val RUTA_HISTORIAL = "historial"
 private const val RUTA_EXCEPCIONES = "excepciones"
 private const val RUTA_INSPECCION_TRANS_ESCOLAR = "inspeccion-trans-escolar"
+private const val RUTA_INSPECCION_INTERNA = "inspeccion-interna"
+private const val RUTA_ADR = "adr"
+private const val RUTA_ADR_CONSULTA_ONU = "adr-consulta-onu"
+private const val RUTA_ADR_CALCULO_1000 = "adr-calculo-1000"
 private const val RUTA_BAREMO = "baremo"
 private const val RUTA_ACERCADE = "acercade"
 private const val RUTA_IMPRESORA_BLUETOOTH = "impresora-bluetooth"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier) {
+fun AppNavigation(
+    modifier: Modifier = Modifier,
+    onOpenPdf: (File) -> Unit = {},
+    onSharePdf: (File) -> Unit = {}
+) {
     val navController = rememberNavController()
     val context = LocalContext.current
 
@@ -176,6 +186,7 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                         viewModel.nuevaConsulta()
                         navController.navigate(RUTA_INSPECCION_TRANS_ESCOLAR) { launchSingleTop = true }
                     },
+                    onAdr = { navController.navigate(RUTA_ADR) { launchSingleTop = true } },
                     onBaremo = { navController.navigate(RUTA_BAREMO) { launchSingleTop = true } },
                     onAcercaDe = { navController.navigate(RUTA_ACERCADE) { launchSingleTop = true } }
                 )
@@ -226,9 +237,50 @@ fun AppNavigation(modifier: Modifier = Modifier) {
                     onAbrirConfiguracionImpresora = {
                         navController.navigate(RUTA_IMPRESORA_BLUETOOTH)
                     },
+                    onAbrirInspeccionInterna = {
+                        navController.navigate(RUTA_INSPECCION_INTERNA)
+                    },
+                    historial = historial,
+                    onImportarHistorial = { item ->
+                        viewModel.mostrarHistorialItem(item)
+                    },
                     onImprimirActa = { resultado ->
                         // La impresión se maneja en la propia screen donde tenemos acceso al contexto
                     }
+                )
+            }
+            composable(RUTA_INSPECCION_INTERNA) {
+                val nfcController = LocalNfcReaderController.current
+                InspeccionInternaScreen(
+                    resultado = (uiState as? UiState.Success)?.resultado,
+                    onBack = { navController.popBackStack() },
+                    onLeerConductor = {
+                        nfcController.enableNfcReaderModeForDniRead()
+                    },
+                    onSharePdf = { data ->
+                        Log.d(TAG, "Generación PDF interna pendiente de conectar")
+                    }
+                )
+            }
+            composable(RUTA_ADR) {
+                AdrScreen(
+                    onBack = { navController.popBackStack() },
+                    onConsultaOnuClick = {
+                        navController.navigate(RUTA_ADR_CONSULTA_ONU) { launchSingleTop = true }
+                    },
+                    onCalculo1000PuntosClick = {
+                        navController.navigate(RUTA_ADR_CALCULO_1000) { launchSingleTop = true }
+                    }
+                )
+            }
+            composable(RUTA_ADR_CONSULTA_ONU) {
+                AdrConsultaOnuScreen(
+                    onBack = { navController.popBackStack() }
+                )
+            }
+            composable(RUTA_ADR_CALCULO_1000) {
+                AdrCalculo1000PuntosScreen(
+                    onBack = { navController.popBackStack() }
                 )
             }
             composable(RUTA_BAREMO) {

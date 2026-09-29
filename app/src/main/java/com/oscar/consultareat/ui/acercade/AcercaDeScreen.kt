@@ -63,6 +63,125 @@ private val FUENTES = listOf(
     )
 )
 
+private data class ReferenciaLegal(
+    val titulo: String,
+    val detalle: String,
+    val url: String
+)
+
+private data class SeccionLegal(
+    val titulo: String,
+    val items: List<ReferenciaLegal>
+)
+
+private val REFERENCIAS_LEGALES = listOf(
+    SeccionLegal(
+        "Ordenación del transporte y registro REAT",
+        listOf(
+            ReferenciaLegal(
+                "Ley 16/1987, de 30 de julio (LOTT)",
+                "Ordenación de los Transportes Terrestres",
+                "https://www.boe.es/buscar/act.php?id=BOE-A-1987-18180"
+            ),
+            ReferenciaLegal(
+                "Real Decreto 1211/1990 (ROTT)",
+                "Reglamento de la Ley de Ordenación de los Transportes Terrestres",
+                "https://www.boe.es/buscar/act.php?id=BOE-A-1990-23936"
+            ),
+            ReferenciaLegal(
+                "Reglamento (CE) n.º 1071/2009",
+                "Acceso a la profesión de transportista",
+                "https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX%3A32009R1071"
+            ),
+            ReferenciaLegal(
+                "Reglamento (CE) n.º 1072/2009",
+                "Acceso al mercado de transporte internacional de mercancías",
+                "https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX%3A32009R1072"
+            )
+        )
+    ),
+    SeccionLegal(
+        "Mercancías peligrosas (ADR)",
+        listOf(
+            ReferenciaLegal(
+                "ADR 2025",
+                "Acuerdo europeo relativo al transporte internacional de mercancías peligrosas por carretera",
+                "https://unece.org/transport/dangerous-goods/adr-2025-vol-i-and-ii"
+            ),
+            ReferenciaLegal(
+                "Real Decreto 97/2014, de 14 de febrero",
+                "Operaciones de transporte de mercancías peligrosas por carretera en territorio español",
+                "https://www.boe.es/buscar/act.php?id=BOE-A-2014-2110"
+            ),
+            ReferenciaLegal(
+                "Directiva 2008/68/CE",
+                "Transporte terrestre de mercancías peligrosas",
+                "https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX%3A32008L0068"
+            ),
+            ReferenciaLegal(
+                "Manual de inspección de mercancías peligrosas",
+                "Manual de inspección del transporte de mercancías peligrosas por carretera",
+                "https://www.transportes.gob.es/transporte-terrestre/inspeccion-y-seguridad-en-el-transporte"
+            )
+        )
+    ),
+    SeccionLegal(
+        "Transporte escolar y seguridad vial",
+        listOf(
+            ReferenciaLegal(
+                "Real Decreto 443/2001, de 27 de abril",
+                "Condiciones de seguridad en el transporte escolar y de menores",
+                "https://www.boe.es/buscar/act.php?id=BOE-A-2001-8503"
+            ),
+            ReferenciaLegal(
+                "RDLeg 6/2015, de 30 de octubre (LSV)",
+                "Tráfico, Circulación de Vehículos a Motor y Seguridad Vial",
+                "https://www.boe.es/buscar/act.php?id=BOE-A-2015-11733"
+            ),
+            ReferenciaLegal(
+                "Real Decreto 1428/2003 (RGCir)",
+                "Reglamento General de Circulación",
+                "https://www.boe.es/buscar/act.php?id=BOE-A-2003-21539"
+            ),
+            ReferenciaLegal(
+                "Real Decreto 2822/1998 (RGVeh)",
+                "Reglamento General de Vehículos",
+                "https://www.boe.es/buscar/act.php?id=BOE-A-1999-3896"
+            ),
+            ReferenciaLegal(
+                "Real Decreto 920/2017 (ITV)",
+                "Inspección técnica de vehículos",
+                "https://www.boe.es/buscar/act.php?id=BOE-A-2017-12841"
+            )
+        )
+    ),
+    SeccionLegal(
+        "Reutilización de datos y privacidad",
+        listOf(
+            ReferenciaLegal(
+                "Ley 37/2007, de 16 de noviembre",
+                "Reutilización de la información del sector público",
+                "https://www.boe.es/buscar/act.php?id=BOE-A-2007-19814"
+            ),
+            ReferenciaLegal(
+                "Directiva (UE) 2019/1024",
+                "Datos abiertos y reutilización de la información del sector público",
+                "https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX%3A32019L1024"
+            ),
+            ReferenciaLegal(
+                "Reglamento (UE) 2016/679 (RGPD)",
+                "Protección de datos personales",
+                "https://eur-lex.europa.eu/legal-content/ES/TXT/?uri=CELEX%3A32016R0679"
+            ),
+            ReferenciaLegal(
+                "Ley Orgánica 3/2018 (LOPDGDD)",
+                "Protección de Datos Personales y garantía de los derechos digitales",
+                "https://www.boe.es/buscar/act.php?id=BOE-A-2018-16673"
+            )
+        )
+    )
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AcercaDeScreen(
@@ -113,7 +232,7 @@ fun AcercaDeScreen(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = "Consulta REAT",
+                        text = "Consulta Transportes",
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -126,8 +245,10 @@ fun AcercaDeScreen(
             }
 
             Text(
-                text = "Consulta REAT es una aplicación no oficial que facilita la consulta del " +
-                    "Registro de Empresas y Actividades de Transporte (REAT).",
+                text = "Consulta Transportes es una aplicación no oficial de apoyo a la inspección del " +
+                    "transporte por carretera. Agrupa la consulta pública del REAT, la consulta del ADR 2025 " +
+                    "(códigos ONU, regla de los 1000 puntos, placas y etiquetas) y la guía de inspección del " +
+                    "transporte escolar y de menores.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -170,6 +291,34 @@ fun AcercaDeScreen(
                         )
                     }
                 )
+            }
+
+            HorizontalDivider(color = BordeSuave)
+
+            Text(
+                text = "Referencias legales",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
+
+            REFERENCIAS_LEGALES.forEach { seccion ->
+                Text(
+                    text = seccion.titulo,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = TextoSecundario,
+                    modifier = Modifier.padding(top = 6.dp)
+                )
+                seccion.items.forEach { referencia ->
+                    FilaFuente(
+                        nombre = referencia.titulo,
+                        dominio = referencia.detalle,
+                        onClick = {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse(referencia.url))
+                            )
+                        }
+                    )
+                }
             }
 
             HorizontalDivider(color = BordeSuave)

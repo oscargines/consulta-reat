@@ -1,5 +1,5 @@
 [versions]
-agp = "9.4.0"
+agp = "9.4.1"
 coreKtx = "1.10.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
@@ -18,6 +18,7 @@ json = "20240303"
 mlkitTextRecognition = "16.0.1"
 camerax = "1.4.2"
 cameraCore = "1.6.1"
+bouncycastle = "1.50"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -47,6 +48,8 @@ squareup-okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-inte
 jsoup = { group = "org.jsoup", name = "jsoup", version.ref = "jsoup" }
 org-json = { group = "org.json", name = "json", version.ref = "json" }
 mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitTextRecognition" }
+bouncycastle-prov = { group = "org.bouncycastle", name = "bcprov-jdk15on", version.ref = "bouncycastle" }
+bouncycastle-pkix = { group = "org.bouncycastle", name = "bcpkix-jdk15on", version.ref = "bouncycastle" }
 androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
 androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
 androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }

@@ -12,6 +12,7 @@ import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Build
+import android.os.SystemClock
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -164,6 +165,7 @@ fun BluetoothPrinterScreen(
     var receiver by remember { mutableStateOf<BroadcastReceiver?>(null) }
 
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        Log.i(BT_TAG, "Resultado permisos Bluetooth: $permissions")
         val allGranted = permissions.values.all { it }
         if (allGranted) {
             scanTrigger = true
@@ -173,6 +175,7 @@ fun BluetoothPrinterScreen(
     }
 
     val enableBluetoothLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        Log.i(BT_TAG, "Resultado activación Bluetooth: resultCode=${result.resultCode}")
         if (result.resultCode == android.app.Activity.RESULT_OK) {
             scanTrigger = true
         } else {
@@ -181,29 +184,36 @@ fun BluetoothPrinterScreen(
     }
 
     fun addDiscoveredPrinter(printer: ScannedBluetoothPrinter) {
-        if (printer.mac.isBlank()) return
+        if (printer.mac.isBlank()) {
+            Log.w(BT_TAG, "Dispositivo ignorado: MAC vacía nombre=${printer.nombre}")
+            return
+        }
         if (discoveredPrinters.none { it.mac == printer.mac }) {
             discoveredPrinters += printer
+            Log.i(BT_TAG, "Dispositivo añadido a la lista: nombre=${printer.nombre}, mac=${printer.mac}, total=${discoveredPrinters.size}")
+        } else {
+            Log.d(BT_TAG, "Dispositivo duplicado ignorado: mac=${printer.mac}")
         }
     }
 
     fun refreshSavedPrinters() {
         if (isInPreview) {
             savedPrinters = listOf(
-                SavedBluetoothPrinter(1, "Zebra ZQ521", "00:11:22:33:44:55"),
-                SavedBluetoothPrinter(2, "Zebra RW420", "AA:BB:CC:DD:EE:FF")
+                SavedBluetoothPrinter(1, "Zebra ZQ521", "00:11:22:33:44:55", "ZQ521", true),
+                SavedBluetoothPrinter(2, "Zebra RW420", "AA:BB:CC:DD:EE:FF", "RW420", false)
             )
-            val defaultPrinter = savedPrinters.firstOrNull()
+            val defaultPrinter = savedPrinters.firstOrNull { it.esPredeterminada }
             selectedSavedPrinterMac = selectedSavedPrinterMac.ifBlank { defaultPrinter?.mac.orEmpty() }
             defaultPrinterName = defaultPrinter?.nombre.orEmpty()
         } else {
-            val defaultPrinter = storage.getDefaultPrinter()
+            savedPrinters = storage.loadSavedPrinters()
+            Log.d(BT_TAG, "Impresoras guardadas cargadas: total=${savedPrinters.size}, " +
+                "datos=${savedPrinters.joinToString { "${it.nombre}/${it.mac}/${it.modelo}" }}")
+            val defaultPrinter = savedPrinters.firstOrNull { it.esPredeterminada }
             if (defaultPrinter != null) {
-                savedPrinters = listOf(defaultPrinter)
                 selectedSavedPrinterMac = selectedSavedPrinterMac.ifBlank { defaultPrinter.mac }
                 defaultPrinterName = defaultPrinter.nombre
             } else {
-                savedPrinters = emptyList()
                 selectedSavedPrinterMac = ""
                 defaultPrinterName = ""
             }
@@ -212,9 +222,19 @@ fun BluetoothPrinterScreen(
 
     @SuppressLint("MissingPermission")
     fun addBondedDevicesAsFallback() {
-        if (bluetoothAdapter == null || !hasBluetoothPermissions(context)) return
+        Log.d(BT_TAG, "Cargando dispositivos emparejados como fallback")
+        if (bluetoothAdapter == null) {
+            Log.w(BT_TAG, "Fallback cancelado: adaptador Bluetooth nulo")
+            return
+        }
+        if (!hasBluetoothPermissions(context)) {
+            Log.w(BT_TAG, "Fallback cancelado: faltan permisos Bluetooth")
+            return
+        }
         runCatching {
-            bluetoothAdapter.bondedDevices?.forEach { device ->
+            val bonded = bluetoothAdapter.bondedDevices.orEmpty()
+            Log.d(BT_TAG, "Dispositivos emparejados encontrados=${bonded.size}")
+            bonded.forEach { device ->
                 val printer = device.toScannedBluetoothPrinter(context)
                 addDiscoveredPrinter(printer)
             }
@@ -236,7 +256,9 @@ fun BluetoothPrinterScreen(
         if (!scanTrigger) return@LaunchedEffect
         scanTrigger = false
 
-        Log.d(BT_TAG, "startBluetoothScan() called")
+        Log.i(BT_TAG, "========== INICIO ESCANEO BLUETOOTH ==========")
+        Log.d(BT_TAG, "estado inicial: adapter=${bluetoothAdapter != null}, " +
+            "isScanning=$isScanning, permisos=${hasBluetoothPermissions(context)}")
         if (bluetoothAdapter == null) {
             Log.w(BT_TAG, "startBluetoothScan: adapter is null → abort")
             statusMessage = context.getString(R.string.bluetooth_printer_not_supported)
@@ -275,8 +297,12 @@ fun BluetoothPrinterScreen(
             return@LaunchedEffect
         }
 
-        Log.d(BT_TAG, "startBluetoothScan: cancelling previous discovery (if any)")
-        bluetoothAdapter.cancelDiscoverySafely(context)
+        if (bluetoothAdapter.isDiscovering) {
+            Log.d(BT_TAG, "Cancelando discovery anterior activo")
+            bluetoothAdapter.cancelDiscoverySafely(context)
+        } else {
+            Log.d(BT_TAG, "No hay discovery anterior activo; no se cancela")
+        }
 
         discoveredPrinters.clear()
         selectedDiscoveredPrinterMac = ""
@@ -284,24 +310,44 @@ fun BluetoothPrinterScreen(
         isScanning = true
         scanSecondsLeft = 10
         statusMessage = context.getString(R.string.bluetooth_printer_scanning)
+        val scanStartedAt = SystemClock.elapsedRealtime()
 
         val scanReceiver = object : BroadcastReceiver() {
             @SuppressLint("MissingPermission")
             override fun onReceive(ctx: Context?, intent: Intent) {
                 val ctxNonNull = ctx ?: return
+                Log.d(BT_TAG, "Broadcast recibido: action=${intent.action}")
                 when (intent.action) {
                     BluetoothDevice.ACTION_FOUND -> {
                         val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
-                        device?.let { addDiscoveredPrinter(it.toScannedBluetoothPrinter(ctxNonNull)) }
+                        if (device == null) {
+                            Log.w(BT_TAG, "ACTION_FOUND sin BluetoothDevice")
+                        } else {
+                            Log.i(BT_TAG, "ACTION_FOUND: name=${device.name}, address=${device.address}, bonded=${device.bondState}")
+                            addDiscoveredPrinter(device.toScannedBluetoothPrinter(ctxNonNull))
+                        }
                     }
                     BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
+                        val elapsed = SystemClock.elapsedRealtime() - scanStartedAt
+                        if (elapsed < 500L) {
+                            Log.w(BT_TAG, "ACTION_DISCOVERY_FINISHED ignorado por prematuro: elapsed=${elapsed}ms")
+                            return
+                        }
+                        Log.i(BT_TAG, "ACTION_DISCOVERY_FINISHED: dispositivos=${discoveredPrinters.size}")
                         isScanning = false
                         scanSecondsLeft = 0
+                        receiver?.let { runCatching { context.unregisterReceiver(it) } }
+                        receiver = null
                         if (discoveredPrinters.isEmpty()) {
                             addBondedDevicesAsFallback()
-                            statusMessage = ctxNonNull.getString(R.string.bluetooth_printer_no_results)
+                            statusMessage = if (discoveredPrinters.isEmpty()) {
+                                ctxNonNull.getString(R.string.bluetooth_printer_no_results)
+                            } else {
+                                ctxNonNull.getString(R.string.bluetooth_printer_showing_paired_only)
+                            }
                         } else {
                             statusMessage = ctxNonNull.getString(R.string.bluetooth_printer_scan_finished)
+                            Log.i(BT_TAG, "Escaneo finalizado con resultados=${discoveredPrinters.size}")
                         }
                     }
                 }
@@ -312,31 +358,53 @@ fun BluetoothPrinterScreen(
             addAction(BluetoothDevice.ACTION_FOUND)
             addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
         }
-        context.registerReceiver(scanReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        // Los eventos ACTION_FOUND/ACTION_DISCOVERY_FINISHED los emite el
+        // sistema Bluetooth, por lo que el receptor debe aceptar broadcasts
+        // del sistema en Android moderno.
+        context.registerReceiver(scanReceiver, filter, Context.RECEIVER_EXPORTED)
         receiver = scanReceiver
+        Log.d(BT_TAG, "BroadcastReceiver registrado con flag RECEIVER_EXPORTED")
 
         coroutineScope.launch {
             for (i in 10 downTo 1) {
                 delay(1000)
                 scanSecondsLeft = i - 1
-                statusMessage = context.getString(R.string.bluetooth_printer_scanning_countdown, i - 1)
+            }
+            // Algunos dispositivos no envían ACTION_DISCOVERY_FINISHED. El
+            // tiempo límite debe cerrar el modal igualmente.
+            if (isScanning) {
+                Log.w(BT_TAG, "Timeout de escaneo alcanzado sin ACTION_DISCOVERY_FINISHED; resultados=${discoveredPrinters.size}")
+                runCatching { bluetoothAdapter.cancelDiscovery() }
+                isScanning = false
+                scanSecondsLeft = 0
+                receiver?.let { runCatching { context.unregisterReceiver(it) } }
+                receiver = null
+                statusMessage = context.getString(R.string.bluetooth_printer_scan_finished)
             }
         }
 
         val started = bluetoothAdapter.startDiscovery()
+        Log.i(BT_TAG, "bluetoothAdapter.startDiscovery() resultado=$started")
         if (!started) {
             isScanning = false
             scanSecondsLeft = 0
             discoveredPrinters.clear()
             addBondedDevicesAsFallback()
             statusMessage = context.getString(R.string.bluetooth_printer_scan_error)
+            Log.e(BT_TAG, "No se pudo iniciar Bluetooth discovery")
         }
     }
 
     // Cleanup effect - unregisters receiver when composable leaves composition
+    // El efecto no debe depender de `receiver`: cambiar esa referencia durante
+    // el escaneo provocaría el dispose inmediato del receptor recién registrado.
     DisposableEffect(Unit) {
+        Log.d(BT_TAG, "DisposableEffect receiver cambiado: activo=${receiver != null}")
         onDispose {
-            receiver?.let { context.unregisterReceiver(it) }
+            receiver?.let {
+                Log.d(BT_TAG, "Desregistrando BroadcastReceiver")
+                runCatching { context.unregisterReceiver(it) }
+            }
         }
     }
 
@@ -344,6 +412,7 @@ fun BluetoothPrinterScreen(
     val canUseSelectedSaved = savedPrinters.any { it.mac == selectedSavedPrinterMac }
 
     LaunchedEffect(Unit) {
+        Log.d(BT_TAG, "Pantalla de impresoras creada; cargando estado inicial")
         refreshSavedPrinters()
         if (!isScanning) {
             addBondedDevicesAsFallback()
@@ -446,7 +515,7 @@ fun BluetoothPrinterScreen(
                         onClick = {
                             if (savedPrinters.any { it.mac == selectedSavedPrinterMac }) {
                                 val selectedPrinter = savedPrinters.first { it.mac == selectedSavedPrinterMac }
-                                storage.saveDefaultPrinter(selectedPrinter.nombre, selectedPrinter.mac)
+                                storage.saveDefaultPrinter(selectedPrinter.nombre, selectedPrinter.mac, selectedPrinter.modelo)
                                 refreshSavedPrinters()
                                 defaultPrinterName = selectedPrinter.nombre
                                 statusMessage = context.getString(
@@ -534,7 +603,9 @@ fun BluetoothPrinterScreen(
         ) {
             Button(
                 onClick = {
-                    Log.d(BT_TAG, "── Scan button pressed ──")
+                    Log.i(BT_TAG, "── Botón BUSCAR pulsado: adapter=${bluetoothAdapter != null}, " +
+                        "enabled=${bluetoothAdapter?.isEnabled}, permisos=${hasBluetoothPermissions(context)}, " +
+                        "discovered=${discoveredPrinters.size}")
                     if (!hasBluetoothPermissions(context)) {
                         permissionLauncher.launch(requiredBluetoothPermissions())
                     } else if (bluetoothAdapter == null) {
@@ -578,7 +649,11 @@ fun BluetoothPrinterScreen(
                                     return@launch
                                 }
 
-                                val saved = storage.saveDefaultPrinter(scannedSelection.nombre, scannedSelection.mac)
+                                val saved = storage.saveDefaultPrinter(
+                                    scannedSelection.nombre,
+                                    scannedSelection.mac,
+                                    detectedModel
+                                )
                                 refreshSavedPrinters()
                                 selectedSavedPrinterMac = saved.mac
                                 defaultPrinterName = saved.nombre
@@ -641,6 +716,28 @@ fun BluetoothPrinterScreen(
                     Text(text = stringResource(R.string.accept_action))
                 }
             }
+        )
+    }
+
+    if (isScanning) {
+        AlertDialog(
+            onDismissRequest = {},
+            title = { Text(stringResource(R.string.bluetooth_printer_scanning_title)) },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    CircularProgressIndicator(color = AzulInstitucional)
+                    Text(statusMessage.ifBlank { stringResource(R.string.bluetooth_printer_scanning) })
+                    Text(
+                        stringResource(R.string.bluetooth_printer_scanning_countdown, scanSecondsLeft),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            },
+            confirmButton = {}
         )
     }
 }

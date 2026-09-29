@@ -29,8 +29,8 @@ android {
         applicationId = "com.oscar.consultareat"
         minSdk = 31
         targetSdk = 37
-        versionCode = 4
-        versionName = "1.2.0"
+        versionCode = 7
+        versionName = "1.5.0"
 
         val localProps = rootProject.file("local.properties")
         val napApiKey = if (localProps.exists()) {
@@ -62,6 +62,19 @@ android {
         compose = true
         buildConfig = true
     }
+    packaging {
+        resources {
+            excludes += "META-INF/DEPENDENCIES"
+            excludes += "META-INF/LICENSE"
+            excludes += "META-INF/LICENSE.txt"
+            excludes += "META-INF/NOTICE"
+            excludes += "META-INF/NOTICE.txt"
+            excludes += "META-INF/versions/9/**"
+            excludes += "META-INF/*.kotlin_module"
+            excludes += "META-INF/*.SF"
+            excludes += "META-INF/*.DSA"
+        }
+    }
 }
 
 dependencies {
@@ -90,7 +103,13 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
-    implementation(fileTree("libs") { include("*.jar") })
+    implementation(fileTree("libs") {
+        include("*.jar")
+        exclude("jmulticard-2.0.jar")
+    })
+    implementation(fileTree("libs") { include("*.aar") })
+    implementation(libs.bouncycastle.prov)
+    implementation(libs.bouncycastle.pkix)
     testImplementation(libs.junit)
     testImplementation(libs.org.json)
     androidTestImplementation(platform(libs.androidx.compose.bom))

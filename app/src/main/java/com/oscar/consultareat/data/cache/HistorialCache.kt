@@ -118,6 +118,9 @@ class HistorialCache(private val context: Context) {
     private fun resultadoToJson(r: ConsultaResultado): JSONObject = JSONObject().apply {
         r.identidadLabel?.let { put("identidadLabel", it) }
         r.identidadValor?.let { put("identidadValor", it) }
+        r.matricula?.let { put("matricula", it) }
+        r.empresaTitular?.let { put("empresaTitular", it) }
+        r.numeroAutorizacion?.let { put("numeroAutorizacion", it) }
         put("autorizaciones", datosToJson(r.autorizaciones))
         put("vehiculos", datosToJson(r.vehiculos))
         put("competenciaProfesional", datosToJson(r.competenciaProfesional))
