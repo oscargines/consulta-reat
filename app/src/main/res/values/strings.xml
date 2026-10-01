@@ -67,12 +67,41 @@
     <string name="bluetooth_printer_discovered_devices">Dispositivos encontrados</string>
     <string name="bluetooth_printer_scanning_title">Buscando impresoras</string>
     <string name="accept_action">Aceptar</string>
+    <string name="volver">Volver</string>
 
     <string name="printing_acta_title">Imprimiendo acta</string>
     <string name="printing_acta_connecting">Conectando con la impresora...</string>
     <string name="printing_acta_sending">Enviando formato...</string>
     <string name="printing_acta_completed">Impresión completada.</string>
     <string name="printing_acta_failed">No se pudo imprimir: %1$s</string>
+
+    <!-- Coeficiente Característico Strings -->
+    <string name="coeficiente_titulo">Coeficiente Característico</string>
+    <string name="coeficiente_titulo_cabecera">Coeficiente Característico</string>
+    <string name="coeficiente_subtitulo_cabecera">Cálculo de perímetro efectivo y detección de fraude en neumáticos</string>
+    <string name="coeficiente_datos_entrada">Datos de entrada</string>
+    <string name="coeficiente_label_w">Coeficiente característico (W) de activación</string>
+    <string name="coeficiente_label_l">Circunferencia efectiva de los neumáticos (L)</string>
+    <string name="coeficiente_label_lr">Circunferencia efectiva en la revisión (Lr)</string>
+    <string name="coeficiente_label_tamano">Tamaño de la rueda (ej. 315/70 R 22.5)</string>
+    <string name="coeficiente_formato_ayuda">Formato: Ancho/Perfil R Diámetro (ej. 315/70 R 22.5)</string>
+    <string name="coeficiente_btn_calcular">Calcular</string>
+    <string name="coeficiente_l_teorica">L teórica</string>
+    <string name="coeficiente_l_revision">L revisión (Lr)</string>
+    <string name="coeficiente_porcentaje_desvio">% Desvío</string>
+    <string name="coeficiente_fraude_detectado">FRAUDE DETECTADO</string>
+    <string name="coeficiente_sin_fraude">Sin fraude detectado</string>
+    <string name="coeficiente_resultados_calculo">Resultados del cálculo</string>
+    <string name="coeficiente_como_medir_titulo">Cómo medir la circunferencia real</string>
+    <string name="coeficiente_como_medir_paso1">1. Marca con tiza o pintura una referencia coincidente en el neumático y en el asfalto.</string>
+    <string name="coeficiente_como_medir_paso2">2. Haz circular el vehículo despacio hasta que la rueda complete una vuelta exacta.</string>
+    <string name="coeficiente_como_medir_paso3">3. Vuelve a marcar el punto en el asfalto donde coincide la referencia del neumático.</string>
+    <string name="coeficiente_como_medir_paso4">4. Mide la distancia entre ambas marcas en el asfalto: esa es la circunferencia real.</string>
+    <string name="coeficiente_diagrama_placeholder">Diagrama explicativo de medición</string>
+    <string name="coeficiente_diagrama_medicion">Croquis de medición de circunferencia de neumático</string>
+    <string name="coeficiente_accion_requerida_titulo">Acción requerida</string>
+    <string name="coeficiente_accion_requerida_texto">Trasladarse a un taller de verificación para su posterior revisión y certificación.</string>
+    <string name="coeficiente_sin_fraude_mensaje">La rueda coincide con la legalizada en taller. No se detecta irregularidad administrativa.</string>
 
     <!-- NFC Reading Strings -->
     <string name="can_dialog_title">Introduce el CAN</string>

@@ -3,6 +3,21 @@
 Todos los cambios notables del proyecto se documentan en este fichero.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [1.5.2] - 2026-10-01
+
+### Añadido
+- **Coeficiente Característico**: nueva pantalla accesible desde la tarjeta "Coeficiente Característico" en la pantalla principal (entre ADR y Acerca de).
+  - Cálculo del perímetro efectivo (L) teórico a partir del tamaño del neumático (formato 315/70 R 22.5).
+  - 3 claves matemáticas exactas: altura goma ×2, llanta a mm (×25.4), diámetro total ×3.1416.
+  - Detección de fraude: % Desvío = (L teórica / Lr) × 100 → ≥104% o ≤96% = fraude confirmado.
+  - Entrada auto-formateada del tamaño de rueda: solo dígitos, inserta `/`, `R` y espacios automáticamente.
+  - Diálogo de resultado con desglose: L teórica, L revisión, % Desvío, estado fraude/sin fraude.
+  - En caso de fraude: instrucciones de medición (4 pasos), diagrama explicativo (Croquis_medicion.png), acción requerida (taller de verificación).
+
+### Mejorado
+- Pantalla scrolleable con padding inferior para que el teclado no tape el último campo (tamaño rueda).
+- Corrección en parsing de tamaño de rueda: acepta formato con y sin separadores.
+
 ## [1.5.1] - 2026-09-29
 
 ### Añadido

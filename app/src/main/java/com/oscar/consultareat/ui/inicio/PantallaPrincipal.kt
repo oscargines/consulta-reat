@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Article
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -59,6 +60,7 @@ fun PantallaPrincipal(
     onInspeccionTransEscolar: () -> Unit,
     onAdr: () -> Unit,
     onBaremo: () -> Unit,
+    onCoeficiente: () -> Unit,
     onAcercaDe: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -144,6 +146,12 @@ fun PantallaPrincipal(
             subtitulo = "Consultas ADR y cálculo de exenciones",
             icono = Icons.Filled.LocalFireDepartment,
             onClick = onAdr
+        )
+        TarjetaAcceso(
+            titulo = "Coeficiente Característico",
+            subtitulo = "Cálculo de perímetro efectivo y detección de fraude",
+            icono = Icons.Filled.Speed,
+            onClick = onCoeficiente
         )
         TarjetaAcceso(
             titulo = "Acerca de",

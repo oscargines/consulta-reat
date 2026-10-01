@@ -73,6 +73,7 @@ import com.oscar.consultareat.ui.historial.HistorialScreen
 import com.oscar.consultareat.ui.inspeccion.InspeccionTransEscolarScreen
 import com.oscar.consultareat.ui.inspeccion.InspeccionInternaScreen
 import com.oscar.consultareat.LocalNfcReaderController
+import com.oscar.consultareat.ui.coeficiente.CoeficienteCaracteristicoScreen
 import com.oscar.consultareat.ui.impresora.BluetoothPrinterScreen
 import com.oscar.consultareat.ui.inicio.PantallaPrincipal
 import com.oscar.consultareat.ui.resultado.ResultadoScreen
@@ -97,6 +98,7 @@ private const val RUTA_ADR_CALCULO_1000 = "adr-calculo-1000"
 private const val RUTA_BAREMO = "baremo"
 private const val RUTA_ACERCADE = "acercade"
 private const val RUTA_IMPRESORA_BLUETOOTH = "impresora-bluetooth"
+private const val RUTA_COEFICIENTE = "coeficiente-caracteristico"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -188,6 +190,7 @@ fun AppNavigation(
                     },
                     onAdr = { navController.navigate(RUTA_ADR) { launchSingleTop = true } },
                     onBaremo = { navController.navigate(RUTA_BAREMO) { launchSingleTop = true } },
+                    onCoeficiente = { navController.navigate(RUTA_COEFICIENTE) { launchSingleTop = true } },
                     onAcercaDe = { navController.navigate(RUTA_ACERCADE) { launchSingleTop = true } }
                 )
             }
@@ -301,6 +304,11 @@ fun AppNavigation(
             composable(RUTA_IMPRESORA_BLUETOOTH) {
                 BluetoothPrinterScreen(
                     onBackClick = { navController.popBackStack() }
+                )
+            }
+            composable(RUTA_COEFICIENTE) {
+                CoeficienteCaracteristicoScreen(
+                    onBack = { navController.popBackStack() }
                 )
             }
         }
