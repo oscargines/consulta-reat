@@ -10,7 +10,8 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
   - Cálculo del perímetro efectivo (L) teórico a partir del tamaño del neumático (formato 315/70 R 22.5).
   - 3 claves matemáticas exactas: altura goma ×2, llanta a mm (×25.4), diámetro total ×3.1416.
   - Detección de fraude: % Desvío = (L teórica / Lr) × 100 → ≥104% o ≤96% = fraude confirmado.
-  - Entrada auto-formateada del tamaño de rueda: solo dígitos, inserta `/`, `R` y espacios automáticamente.
+  - Selección del tamaño de rueda mediante desplegable con catálogo de tamaños estándar (315/70 R 22.5, 295/80 R 22.5, etc.): elimina la entrada manual que obligaba a corregir el cursor por los caracteres no numéricos.
+  - Botón "No encuentro una numeración válida": modal en el que se mide y se introduce la altura total del neumático (mm, rango 400–1500). La L teórica se calcula como altura × 3.1416, se muestra en una tarjeta reeditable y entra en el mismo cálculo de desvío.
   - Diálogo de resultado con desglose: L teórica, L revisión, % Desvío, estado fraude/sin fraude.
   - En caso de fraude: instrucciones de medición (4 pasos), diagrama explicativo (Croquis_medicion.png), acción requerida (taller de verificación).
 

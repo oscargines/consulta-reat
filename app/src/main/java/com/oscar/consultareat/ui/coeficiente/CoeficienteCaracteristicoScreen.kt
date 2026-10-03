@@ -27,15 +27,22 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -185,27 +192,109 @@ fun CoeficienteCaracteristicoScreen(
                             shape = RoundedCornerShape(12.dp)
                         )
 
-                        OutlinedTextField(
-                            value = viewModel.tamanoRueda,
-                            onValueChange = { viewModel.onTamanoRuedaChange(it) },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            label = { Text(stringResource(R.string.coeficiente_label_tamano)) },
-                            leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null, tint = AzulInstitucional) },
-                            placeholder = { Text("315/70 R 22.5") },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Ascii,
-                                imeAction = ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(onDone = { viewModel.calculate() }),
-                            shape = RoundedCornerShape(12.dp)
-                        )
+                        var ruedaExpanded by remember { mutableStateOf(false) }
+
+                        ExposedDropdownMenuBox(
+                            expanded = ruedaExpanded,
+                            onExpandedChange = { ruedaExpanded = it }
+                        ) {
+                            OutlinedTextField(
+                                value = viewModel.tamanoRuedaSeleccionada?.label.orEmpty(),
+                                onValueChange = {},
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
+                                readOnly = true,
+                                singleLine = true,
+                                label = { Text(stringResource(R.string.coeficiente_label_tamano)) },
+                                leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null, tint = AzulInstitucional) },
+                                placeholder = { Text("315/70 R 22.5") },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = ruedaExpanded) },
+                                shape = RoundedCornerShape(12.dp)
+                            )
+
+                            DropdownMenu(
+                                expanded = ruedaExpanded,
+                                onDismissRequest = { ruedaExpanded = false },
+                                modifier = Modifier.fillMaxWidth(0.9f)
+                            ) {
+                                CATALOGO_RUEDAS.forEach { opcion ->
+                                    DropdownMenuItem(
+                                        text = { Text(opcion.label) },
+                                        onClick = {
+                                            viewModel.onTamanoRuedaSeleccionada(opcion)
+                                            ruedaExpanded = false
+                                        }
+                                    )
+                                }
+                            }
+                        }
 
                         Text(
                             text = stringResource(R.string.coeficiente_formato_ayuda),
                             style = MaterialTheme.typography.bodySmall,
                             color = TextoSecundario
                         )
+
+                        val alturaConfirmada = viewModel.alturaConfirmadaMm
+                        if (alturaConfirmada != null) {
+                            Card(
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = AzulClaro),
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp, vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(
+                                        Icons.Filled.Straighten,
+                                        contentDescription = null,
+                                        tint = AzulInstitucional,
+                                        modifier = Modifier.size(22.dp)
+                                    )
+                                    Column(Modifier.weight(1f)) {
+                                        Text(
+                                            text = stringResource(R.string.coeficiente_altura_medida, alturaConfirmada),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            fontWeight = FontWeight.Bold,
+                                            color = AzulInstitucional
+                                        )
+                                        Text(
+                                            text = stringResource(
+                                                R.string.coeficiente_altura_lt_preview,
+                                                viewModel.lTeoricaPorAltura() ?: 0.0
+                                            ),
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = TextoSecundario
+                                        )
+                                    }
+                                    IconButton(onClick = { viewModel.limpiarAltura() }) {
+                                        Icon(
+                                            Icons.Filled.Close,
+                                            contentDescription = stringResource(R.string.coeficiente_altura_quitar)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        OutlinedButton(
+                            onClick = { viewModel.abrirDialogoAltura() },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Icon(
+                                Icons.Filled.Straighten,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = AzulInstitucional
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(stringResource(R.string.coeficiente_btn_no_encuentro))
+                        }
 
                         Button(
                             onClick = { viewModel.calculate() },
@@ -248,6 +337,17 @@ fun CoeficienteCaracteristicoScreen(
                     )
                 }
             }
+
+        // Diálogo de medida de altura del neumático
+        if (viewModel.showAlturaDialog) {
+            AlturaNeumaticoDialog(
+                valor = viewModel.alturaNeumatico,
+                error = viewModel.alturaError,
+                onValorChange = { viewModel.onAlturaChange(it) },
+                onConfirmar = { viewModel.confirmarAltura() },
+                onCancelar = { viewModel.cancelarDialogoAltura() }
+            )
+        }
     }
 }
 
@@ -519,4 +619,76 @@ private fun ResultadoFila(label: String, value: String, isHighlighted: Boolean =
             color = if (isHighlighted) color else MaterialTheme.colorScheme.onSurface
         )
     }
+}
+
+@Composable
+private fun AlturaNeumaticoDialog(
+    valor: String,
+    error: String?,
+    onValorChange: (String) -> Unit,
+    onConfirmar: () -> Unit,
+    onCancelar: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onCancelar,
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(bottom = 8.dp)
+            ) {
+                Icon(
+                    Icons.Filled.Straighten,
+                    contentDescription = null,
+                    tint = AzulInstitucional,
+                    modifier = Modifier.size(26.dp)
+                )
+                Text(
+                    stringResource(R.string.coeficiente_altura_titulo),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = AzulInstitucional
+                )
+            }
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    stringResource(R.string.coeficiente_altura_mensaje),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextoSecundario
+                )
+                OutlinedTextField(
+                    value = valor,
+                    onValueChange = onValorChange,
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    label = { Text(stringResource(R.string.coeficiente_altura_label)) },
+                    placeholder = { Text(stringResource(R.string.coeficiente_altura_placeholder)) },
+                    isError = error != null,
+                    supportingText = {
+                        if (error != null) {
+                            Text(error)
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(onDone = { onConfirmar() }),
+                    shape = RoundedCornerShape(12.dp)
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirmar) {
+                Text(stringResource(R.string.coeficiente_altura_guardar))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onCancelar) {
+                Text(stringResource(R.string.cancel_action))
+            }
+        }
+    )
 }
