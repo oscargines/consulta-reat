@@ -29,8 +29,8 @@ android {
         applicationId = "com.oscar.consultareat"
         minSdk = 31
         targetSdk = 37
-        versionCode = 9
-        versionName = "1.5.2"
+        versionCode = 10
+        versionName = "1.5.3"
 
         val localProps = rootProject.file("local.properties")
         val napApiKey = if (localProps.exists()) {

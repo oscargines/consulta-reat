@@ -4,11 +4,14 @@ import android.content.Context
 import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.util.Log
+import android.database.sqlite.SQLiteException
 import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -19,6 +22,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,6 +39,7 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -43,12 +48,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,9 +77,12 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oscar.consultareat.R
 import com.oscar.consultareat.data.adr.AdrDatabase
+import com.oscar.consultareat.data.adr.AdrNumeroPeligro
 import com.oscar.consultareat.data.adr.AdrRepository
 import com.oscar.consultareat.data.adr.AdrTablaAItem
 import com.oscar.consultareat.data.adr.AdrTablaBItem
+import com.oscar.consultareat.data.adr.AdrInstruccionEmbalaje
+import com.oscar.consultareat.data.adr.AdrInstruccionesEmbalajeRepository
 import com.oscar.consultareat.ui.theme.AzulClaro
 import com.oscar.consultareat.ui.theme.AzulInstitucional
 import com.oscar.consultareat.ui.theme.FondoGris
@@ -80,6 +90,7 @@ import com.oscar.consultareat.ui.theme.TextoSecundario
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class AdrConsultaOnuViewModel(
     private val repository: AdrRepository
@@ -164,6 +175,33 @@ fun AdrConsultaOnuScreen(
     val context = LocalContext.current
     val repository = remember { AdrRepository(AdrDatabase(context)) }
     val viewModel: AdrConsultaOnuViewModel = viewModel(factory = AdrConsultaOnuViewModelFactory(repository))
+    val instruccionesRepository = remember { AdrInstruccionesEmbalajeRepository(context) }
+    val scope = rememberCoroutineScope()
+    var codigoInstruccion by remember { mutableStateOf<String?>(null) }
+    var instruccionEmbalaje by remember { mutableStateOf<AdrInstruccionEmbalaje?>(null) }
+    var cargandoInstruccion by remember { mutableStateOf(false) }
+    var errorInstruccion by remember { mutableStateOf<String?>(null) }
+
+    val abrirInstruccion: (String) -> Unit = { codigo ->
+        codigoInstruccion = codigo
+        instruccionEmbalaje = null
+        errorInstruccion = null
+        cargandoInstruccion = true
+        scope.launch {
+            try {
+                instruccionEmbalaje = withContext(Dispatchers.IO) {
+                    instruccionesRepository.buscar(codigo)
+                }
+                if (instruccionEmbalaje == null) {
+                    errorInstruccion = "No se ha encontrado la instrucción $codigo en el ADR 2025."
+                }
+            } catch (exception: SQLiteException) {
+                errorInstruccion = "No se pudo consultar la instrucción $codigo: ${exception.message}"
+            } finally {
+                cargandoInstruccion = false
+            }
+        }
+    }
 
     Scaffold(
         modifier = modifier,
@@ -330,7 +368,10 @@ fun AdrConsultaOnuScreen(
                                     color = AzulInstitucional
                                 )
                                 viewModel.detalleItems.forEach { detalle ->
-                                    DetalleTablaAItem(item = detalle)
+                                    DetalleTablaAItem(
+                                        item = detalle,
+                                        onInstruccionClick = abrirInstruccion
+                                    )
                                 }
                             } else {
                                 Text(
@@ -339,6 +380,50 @@ fun AdrConsultaOnuScreen(
                                     color = TextoSecundario
                                 )
                             }
+                        }
+
+                        codigoInstruccion?.let { codigo ->
+                            AlertDialog(
+                                onDismissRequest = { codigoInstruccion = null },
+                                title = {
+                                    Text(
+                                        instruccionEmbalaje?.let { "$codigo — ${it.titulo}" }
+                                            ?: "Instrucción de embalaje $codigo"
+                                    )
+                                },
+                                text = {
+                                    when {
+                                        cargandoInstruccion -> androidx.compose.material3.CircularProgressIndicator()
+                                        errorInstruccion != null -> Text(errorInstruccion!!)
+                                        instruccionEmbalaje != null -> {
+                                            val detalle = instruccionEmbalaje!!
+                                            Column(
+                                                modifier = Modifier
+                                                    .heightIn(max = 440.dp)
+                                                    .verticalScroll(rememberScrollState()),
+                                                verticalArrangement = Arrangement.spacedBy(12.dp)
+                                            ) {
+                                                Text(detalle.contenido, style = MaterialTheme.typography.bodySmall)
+                                                Text(
+                                                    "${detalle.seccionAdr} · páginas ${detalle.paginaInicio}" +
+                                                        if (detalle.paginaInicio == detalle.paginaFin) {
+                                                            ""
+                                                        } else {
+                                                            "–${detalle.paginaFin}"
+                                                        },
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = TextoSecundario
+                                                )
+                                            }
+                                        }
+                                    }
+                                },
+                                confirmButton = {
+                                    TextButton(onClick = { codigoInstruccion = null }) {
+                                        Text("Aceptar")
+                                    }
+                                }
+                            )
                         }
                     }
                 }
@@ -435,7 +520,14 @@ private fun ResultadoItem(
 }
 
 @Composable
-private fun DetalleTablaAItem(item: AdrTablaAItem) {
+private fun DetalleTablaAItem(
+    item: AdrTablaAItem,
+    onInstruccionClick: (String) -> Unit
+) {
+    val numeroPeligro = item.numeroPeligro?.trim()
+    val descripcionPeligro = numeroPeligro?.let(AdrNumeroPeligro::descripcion)
+    var mostrarDescripcionPeligro by remember(item.numeroPeligro) { mutableStateOf(false) }
+
     Card(
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
@@ -453,7 +545,11 @@ private fun DetalleTablaAItem(item: AdrTablaAItem) {
             // Placa naranja ADR
             PlacaNaranjaAdr(
                 numeroPeligro = item.numeroPeligro,
-                numeroOnu = item.numeroOnu
+                numeroOnu = item.numeroOnu,
+                onNumeroPeligroClick = {
+                    if (descripcionPeligro != null) mostrarDescripcionPeligro = true
+                },
+                numeroPeligroClickable = descripcionPeligro != null
             )
             
             // Etiquetas de peligro ADR
@@ -473,11 +569,21 @@ private fun DetalleTablaAItem(item: AdrTablaAItem) {
             ) {
                 DatoItem("Cat. transporte", item.categoriaTransporte)
                 DatoItem("Código túnel", item.codigoTunel)
-                DatoItem("Nº peligro", item.numeroPeligro)
+                DatoItem(
+                    "Nº peligro",
+                    item.numeroPeligro,
+                    onClick = if (descripcionPeligro != null) {
+                        { mostrarDescripcionPeligro = true }
+                    } else {
+                        null
+                    }
+                )
             }
             item.cantidadesLimitadas?.let { if (it.isNotBlank()) DatoItem("Cant. limitadas", it) }
             item.cantidadesExceptuadas?.let { if (it.isNotBlank()) DatoItem("Cant. exceptuadas", it) }
-            item.instruccionesEmbalaje?.let { if (it.isNotBlank()) DatoItem("Instr. embalaje", it) }
+            item.instruccionesEmbalaje?.let {
+                if (it.isNotBlank()) InstruccionesEmbalajeItem(it, onInstruccionClick)
+            }
             item.disposicionesEspeciales?.let { if (it.isNotBlank()) DatoItem("Disp. especiales", it) }
             item.disposicionesTransporteBultos?.let { if (it.isNotBlank()) DatoItem("Transporte bultos", it) }
             item.disposicionesTransporteGranel?.let { if (it.isNotBlank()) DatoItem("Transporte granel", it) }
@@ -485,12 +591,67 @@ private fun DetalleTablaAItem(item: AdrTablaAItem) {
             item.disposicionesExplotacion?.let { if (it.isNotBlank()) DatoItem("Explotación", it) }
         }
     }
+
+    if (mostrarDescripcionPeligro && descripcionPeligro != null) {
+        AlertDialog(
+            onDismissRequest = { mostrarDescripcionPeligro = false },
+            title = { Text("Número de peligro $numeroPeligro") },
+            text = { Text(descripcionPeligro) },
+            confirmButton = {
+                TextButton(onClick = { mostrarDescripcionPeligro = false }) {
+                    Text("Aceptar")
+                }
+            }
+        )
+    }
+}
+
+private val CODIGO_INSTRUCCION_EMBALAJE =
+    Regex("""(?<![A-Z0-9])(?:P\d{3}(?:\([A-Z]\)|[A-Z]\))?|IBC\d{2,3}|LP\d{2,3}|R\d{3})(?![A-Z0-9])""", RegexOption.IGNORE_CASE)
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun InstruccionesEmbalajeItem(
+    value: String,
+    onInstruccionClick: (String) -> Unit
+) {
+    val codigos = remember(value) {
+        CODIGO_INSTRUCCION_EMBALAJE.findAll(value)
+            .map { it.value }
+            .distinctBy { it.uppercase() }
+            .toList()
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text("Instr. embalaje", style = MaterialTheme.typography.labelSmall, color = TextoSecundario)
+        if (codigos.isEmpty()) {
+            Text(value, style = MaterialTheme.typography.bodySmall)
+        } else {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                codigos.forEach { codigo ->
+                    Text(
+                        text = codigo,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = AzulInstitucional,
+                            textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline
+                        ),
+                        modifier = Modifier.clickable { onInstruccionClick(codigo) }
+                    )
+                }
+            }
+        }
+    }
 }
 
 @Composable
 private fun PlacaNaranjaAdr(
     numeroPeligro: String?,
-    numeroOnu: String?
+    numeroOnu: String?,
+    onNumeroPeligroClick: () -> Unit,
+    numeroPeligroClickable: Boolean
 ) {
     val peligro = numeroPeligro?.takeIf { it.isNotBlank() } ?: "—"
     val onu = numeroOnu?.takeIf { it.isNotBlank() } ?: "—"
@@ -527,7 +688,11 @@ private fun PlacaNaranjaAdr(
                     fontWeight = FontWeight.Bold,
                     color = Color.Black,
                     maxLines = 1,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.clickable(
+                        enabled = numeroPeligroClickable,
+                        onClick = onNumeroPeligroClick
+                    )
                 )
             }
             // Banda divisoria central negra
@@ -695,10 +860,12 @@ private fun EtiquetaDiamanteAdr(etiqueta: EtiquetaAdr) {
 }
 
 @Composable
-private fun DatoItem(label: String, value: String?) {
+private fun DatoItem(label: String, value: String?, onClick: (() -> Unit)? = null) {
     value?.let { v ->
         if (v.isNotBlank()) {
-            Column {
+            Column(
+                modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
+            ) {
                 Text(label, style = MaterialTheme.typography.labelSmall, color = TextoSecundario)
                 Text(v, style = MaterialTheme.typography.bodySmall)
             }

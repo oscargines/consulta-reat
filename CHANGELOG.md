@@ -3,6 +3,12 @@
 Todos los cambios notables del proyecto se documentan en este fichero.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [1.5.3] - 2026-10-08
+
+### Añadido
+- **Consulta ADR**: al pulsar el número de peligro de la placa naranja o su dato, se muestra la descripción del código correspondiente.
+- **Instrucciones de embalaje ADR 4.1**: consulta en un modal el texto completo de los códigos P, IBC, LP y R, con sección y páginas del ADR 2025. El contenido se sirve desde una base SQLite indexada generada mediante `create_adr_packaging_db.py`.
+
 ## [1.5.2] - 2026-10-01
 
 ### Añadido

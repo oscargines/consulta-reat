@@ -8,7 +8,7 @@ Los documentos fuente están versionados en la carpeta `Assets/`:
 
 | Documento | Contenido |
 | --- | --- |
-| `ADR 2025.pdf` | Texto oficial del ADR 2025 en español (capítulo 5.3: placas-etiquetas, panel naranja, marcas). |
+| `ADR 2025.pdf` | Texto oficial del ADR 2025 en español (capítulos 4.1 y 5.3: embalajes, placas-etiquetas y panel naranja). |
 | `5 2026-03-03-Manual inspección 2025 MMPP (1).pdf` | Manual de inspección del transporte de mercancías peligrosas 2025 (cuadro 1.1.3.6.3, cálculo 1.1.3.6.4). |
 | `tabla_a_adr_2025_boe.xls` | Tabla A del ADR 2025 publicada por el BOE (fuente de la base de datos). |
 | `tabla_b_adr_2025.docx` | Tabla B del ADR 2025 publicada por el BOE (fuente de la base de datos). |
@@ -24,11 +24,22 @@ Los documentos fuente están versionados en la carpeta `Assets/`:
 - La app copia la base al almacenamiento privado en el primer uso (`AdrDatabase`) y migra a la versión 2 añadiendo `nombre_normalized` si falta.
 - Discrepancia conocida: la Tabla B del BOE no contiene 404 N.º ONU presentes en Tabla A (mayoría de clase 1). La búsqueda hace `UNION` con Tabla A para cubrirlos.
 
+### Instrucciones de embalaje ADR 4.1
+
+- Fichero: `app/src/main/assets/adr_embalajes_2025.db` (SQLite, indexada por código).
+- Generador: `create_adr_packaging_db.py` (raíz del proyecto). Requiere `pypdf` y extrae las instrucciones P, IBC, LP y R de los apartados 4.1.4.1 a 4.1.4.3 del `ADR 2025.pdf`.
+- La base contiene las instrucciones completas del ADR 2025, incluidos textos continuados en varias páginas, con código, título, contenido, sección y páginas impresas como referencia. La clave primaria indexada por código permite consultarlas directamente sin volver a procesar el PDF en el dispositivo.
+- Al pulsar un código de la columna «Instr. embalaje» en la consulta ONU, se muestra el texto de la instrucción, su sección ADR y las páginas de referencia. Se admiten códigos individuales en las instrucciones combinadas de Tabla A, incluidos los sufijos alfabéticos, IBC, LP y R.
+- Al pulsar el número superior de la placa naranja o el dato «Nº peligro», se muestra la descripción del código de peligro desde el catálogo ADR incluido en `data/adr/AdrNumeroPeligro.kt`.
+
 ### Regenerar la base
 
 ```bash
 pip install xlrd
 python create_adr_db.py
+
+pip install pypdf
+python create_adr_packaging_db.py
 ```
 
 ## Consulta de códigos ONU

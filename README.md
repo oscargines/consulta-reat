@@ -14,7 +14,7 @@ La aplicación consulta los datos públicos del REAT publicados por el Ministeri
 - **Enriquecimiento con datos abiertos NAP**: cuando una consulta devuelve datos de una empresa, se completan los operadores y conjuntos de datos publicados en NAP.
 - **Resultados en tarjetas** con estado visual (vigente / en trámite / caducada) y detalle expandible.
 - **Historial local** de consultas (hasta 20 registros, 30 días de retención, con detección de duplicados).
-- **Consulta ADR 2025**: búsqueda de mercancías por N.º ONU o nombre (Tablas A y B), placa naranja conforme a ADR 5.3.2 y etiquetas de peligro de las clases 1 a 9.
+- **Consulta ADR 2025**: búsqueda de mercancías por N.º ONU o nombre (Tablas A y B), placa naranja conforme a ADR 5.3.2 y etiquetas de peligro de las clases 1 a 9; consulta las descripciones del número de peligro y las instrucciones de embalaje ADR 4.1 pulsando sus códigos.
 - **Regla de los 1000 puntos (ADR 1.1.3.6)**: cálculo de exenciones con selección de grupo de embalaje, cantidades en litros o kilogramos y desglose por categoría de transporte.
 - **Baremo sancionador** local, versión 7.3, con 1.066 infracciones, filtros por índice y gravedad, búsqueda textual y detalle normativo.
 - **Inspección de Transporte Escolar**: consulta de autobuses por matrícula, importación de datos del REAT, cálculo de antigüedad al 1 de septiembre y guía rápida del Real Decreto 443/2001.
