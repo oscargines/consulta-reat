@@ -81,6 +81,9 @@ import com.oscar.consultareat.data.adr.AdrNumeroPeligro
 import com.oscar.consultareat.data.adr.AdrRepository
 import com.oscar.consultareat.data.adr.AdrTablaAItem
 import com.oscar.consultareat.data.adr.AdrTablaBItem
+import com.oscar.consultareat.data.adr.AdrDisposicionExplotacion
+import com.oscar.consultareat.data.adr.AdrDisposicionesExplotacionRepository
+import com.oscar.consultareat.data.adr.CORRECCIONES_TABLA_A
 import com.oscar.consultareat.data.adr.AdrInstruccionEmbalaje
 import com.oscar.consultareat.data.adr.AdrInstruccionesEmbalajeRepository
 import com.oscar.consultareat.ui.theme.AzulClaro
@@ -176,11 +179,21 @@ fun AdrConsultaOnuScreen(
     val repository = remember { AdrRepository(AdrDatabase(context)) }
     val viewModel: AdrConsultaOnuViewModel = viewModel(factory = AdrConsultaOnuViewModelFactory(repository))
     val instruccionesRepository = remember { AdrInstruccionesEmbalajeRepository(context) }
+    val disposicionesExplotacionRepository = remember {
+        AdrDisposicionesExplotacionRepository(context)
+    }
     val scope = rememberCoroutineScope()
     var codigoInstruccion by remember { mutableStateOf<String?>(null) }
     var instruccionEmbalaje by remember { mutableStateOf<AdrInstruccionEmbalaje?>(null) }
     var cargandoInstruccion by remember { mutableStateOf(false) }
     var errorInstruccion by remember { mutableStateOf<String?>(null) }
+    var codigosExplotacion by remember { mutableStateOf<List<String>?>(null) }
+    var disposicionesExplotacion by remember {
+        mutableStateOf<List<AdrDisposicionExplotacion>>(emptyList())
+    }
+    var cargandoExplotacion by remember { mutableStateOf(false) }
+    var errorExplotacion by remember { mutableStateOf<String?>(null) }
+    var notasExplotacion by remember { mutableStateOf<List<String>>(emptyList()) }
 
     val abrirInstruccion: (String) -> Unit = { codigo ->
         codigoInstruccion = codigo
@@ -199,6 +212,41 @@ fun AdrConsultaOnuScreen(
                 errorInstruccion = "No se pudo consultar la instrucción $codigo: ${exception.message}"
             } finally {
                 cargandoInstruccion = false
+            }
+        }
+    }
+
+    val abrirDisposicionesExplotacion: (String) -> Unit = { value ->
+        val codigos = REGEX_DISPOSICION_EXPLOTACION.findAll(value)
+            .map { it.value.uppercase() }
+            .distinct()
+            .toList()
+        val corregidos = codigos.map { CORRECCIONES_TABLA_A[it] ?: it }.distinct()
+        notasExplotacion = codigos.zip(corregidos)
+            .filter { (original, corregido) -> original != corregido }
+            .map { (original, corregido) ->
+                "La disposición $original de la Tabla A del BOE se ha interpretado como $corregido conforme al ADR 2025 oficial."
+            }
+        codigosExplotacion = codigos
+        disposicionesExplotacion = emptyList()
+        errorExplotacion = null
+        cargandoExplotacion = true
+        scope.launch {
+            try {
+                val encontradas = withContext(Dispatchers.IO) {
+                    corregidos.mapNotNull(disposicionesExplotacionRepository::buscar)
+                }
+                disposicionesExplotacion = encontradas
+                val noEncontradas = corregidos - encontradas.map { it.codigo }.toSet()
+                if (noEncontradas.isNotEmpty()) {
+                    errorExplotacion =
+                        "No se han encontrado en el ADR 2025 las disposiciones ${noEncontradas.joinToString()}."
+                }
+            } catch (exception: SQLiteException) {
+                errorExplotacion =
+                    "No se pudieron consultar las disposiciones del ADR 2025: ${exception.message}"
+            } finally {
+                cargandoExplotacion = false
             }
         }
     }
@@ -370,7 +418,8 @@ fun AdrConsultaOnuScreen(
                                 viewModel.detalleItems.forEach { detalle ->
                                     DetalleTablaAItem(
                                         item = detalle,
-                                        onInstruccionClick = abrirInstruccion
+                                        onInstruccionClick = abrirInstruccion,
+                                        onExplotacionClick = abrirDisposicionesExplotacion
                                     )
                                 }
                             } else {
@@ -416,10 +465,77 @@ fun AdrConsultaOnuScreen(
                                                 )
                                             }
                                         }
+
                                     }
                                 },
                                 confirmButton = {
                                     TextButton(onClick = { codigoInstruccion = null }) {
+                                        Text("Aceptar")
+                                    }
+                                }
+                            )
+                        }
+
+                        codigosExplotacion?.let { codigos ->
+                            AlertDialog(
+                                onDismissRequest = { codigosExplotacion = null },
+                                title = { Text("Disposiciones relativas a la explotación") },
+                                text = {
+                                    if (cargandoExplotacion) {
+                                        androidx.compose.material3.CircularProgressIndicator()
+                                    } else {
+                                        Column(
+                                            modifier = Modifier
+                                                .heightIn(max = 440.dp)
+                                                .verticalScroll(rememberScrollState()),
+                                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            if (codigos.isEmpty()) {
+                                                Text("No se han encontrado códigos de disposición.")
+                                            }
+                                            disposicionesExplotacion.forEach { disposicion ->
+                                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                                    Text(
+                                                        disposicion.codigo,
+                                                        style = MaterialTheme.typography.titleSmall,
+                                                        color = AzulInstitucional,
+                                                        fontWeight = FontWeight.Bold
+                                                    )
+                                                    Text(
+                                                        disposicion.contenido,
+                                                        style = MaterialTheme.typography.bodySmall
+                                                    )
+                                                    Text(
+                                                        "ADR 8.5 · página ${disposicion.paginaInicio}" +
+                                                            if (disposicion.paginaInicio == disposicion.paginaFin) {
+                                                                ""
+                                                            } else {
+                                                                "–${disposicion.paginaFin}"
+                                                            },
+                                                        style = MaterialTheme.typography.labelSmall,
+                                                        color = TextoSecundario
+                                                    )
+                                                }
+                                            }
+                                            notasExplotacion.forEach { nota ->
+                                                Text(
+                                                    nota,
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = TextoSecundario
+                                                )
+                                            }
+                                            errorExplotacion?.let { error ->
+                                                Text(
+                                                    error,
+                                                    color = MaterialTheme.colorScheme.error,
+                                                    style = MaterialTheme.typography.bodySmall
+                                                )
+                                            }
+                                        }
+                                    }
+                                },
+                                confirmButton = {
+                                    TextButton(onClick = { codigosExplotacion = null }) {
                                         Text("Aceptar")
                                     }
                                 }
@@ -522,7 +638,8 @@ private fun ResultadoItem(
 @Composable
 private fun DetalleTablaAItem(
     item: AdrTablaAItem,
-    onInstruccionClick: (String) -> Unit
+    onInstruccionClick: (String) -> Unit,
+    onExplotacionClick: (String) -> Unit
 ) {
     val numeroPeligro = item.numeroPeligro?.trim()
     val descripcionPeligro = numeroPeligro?.let(AdrNumeroPeligro::descripcion)
@@ -588,7 +705,11 @@ private fun DetalleTablaAItem(
             item.disposicionesTransporteBultos?.let { if (it.isNotBlank()) DatoItem("Transporte bultos", it) }
             item.disposicionesTransporteGranel?.let { if (it.isNotBlank()) DatoItem("Transporte granel", it) }
             item.disposicionesCargaDescarga?.let { if (it.isNotBlank()) DatoItem("Carga/descarga", it) }
-            item.disposicionesExplotacion?.let { if (it.isNotBlank()) DatoItem("Explotación", it) }
+            item.disposicionesExplotacion?.let {
+                if (it.isNotBlank()) {
+                    DatoItem("Explotación", it, onClick = { onExplotacionClick(it) })
+                }
+            }
         }
     }
 
@@ -608,6 +729,8 @@ private fun DetalleTablaAItem(
 
 private val CODIGO_INSTRUCCION_EMBALAJE =
     Regex("""(?<![A-Z0-9])(?:P\d{3}(?:\([A-Z]\)|[A-Z]\))?|IBC\d{2,3}|LP\d{2,3}|R\d{3})(?![A-Z0-9])""", RegexOption.IGNORE_CASE)
+private val REGEX_DISPOSICION_EXPLOTACION =
+    Regex("""\bS\d{1,2}\b""", RegexOption.IGNORE_CASE)
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -867,7 +990,17 @@ private fun DatoItem(label: String, value: String?, onClick: (() -> Unit)? = nul
                 modifier = if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier
             ) {
                 Text(label, style = MaterialTheme.typography.labelSmall, color = TextoSecundario)
-                Text(v, style = MaterialTheme.typography.bodySmall)
+                Text(
+                    v,
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        color = if (onClick != null) AzulInstitucional else MaterialTheme.colorScheme.onSurface,
+                        textDecoration = if (onClick != null) {
+                            androidx.compose.ui.text.style.TextDecoration.Underline
+                        } else {
+                            null
+                        }
+                    )
+                )
             }
         }
     }

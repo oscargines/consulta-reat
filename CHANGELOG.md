@@ -3,6 +3,11 @@
 Todos los cambios notables del proyecto se documentan en este fichero.
 El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
 
+## [1.5.4] - 2026-10-08
+
+### Añadido
+- **Disposiciones de explotación ADR 8.5**: al pulsar el dato «Explotación» en la consulta ONU se abre un modal con el texto completo de las disposiciones S citadas, con páginas de referencia. El contenido se sirve desde una base SQLite indexada generada mediante `create_adr_exploitation_db.py`. Incluye la corrección curada de la errata de la Tabla A del BOE para el ONU 3375 (S29 interpretada como S9 conforme al ADR 2025 oficial).
+
 ## [1.5.3] - 2026-10-08
 
 ### Añadido

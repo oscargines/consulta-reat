@@ -32,6 +32,14 @@ Los documentos fuente están versionados en la carpeta `Assets/`:
 - Al pulsar un código de la columna «Instr. embalaje» en la consulta ONU, se muestra el texto de la instrucción, su sección ADR y las páginas de referencia. Se admiten códigos individuales en las instrucciones combinadas de Tabla A, incluidos los sufijos alfabéticos, IBC, LP y R.
 - Al pulsar el número superior de la placa naranja o el dato «Nº peligro», se muestra la descripción del código de peligro desde el catálogo ADR incluido en `data/adr/AdrNumeroPeligro.kt`.
 
+### Disposiciones de explotación ADR 8.5
+
+- Fichero: `app/src/main/assets/adr_explotacion_2025.db` (SQLite, indexada por código).
+- Generador: `create_adr_exploitation_db.py` (raíz del proyecto). Requiere `pypdf` y extrae las disposiciones S1 a S24 del capítulo 8.5 del `ADR 2025.pdf` (páginas impresas 973-976).
+- La base contiene el texto completo de cada disposición, incluidas las suprimidas (S7 y S13), con código, contenido y páginas impresas como referencia.
+- Al pulsar el dato «Explotación» en la consulta ONU, se muestran en un modal las disposiciones citadas, una a una, con su referencia de páginas del ADR.
+- Corrección curada (`CORRECCIONES_TABLA_A` en `AdrDisposicionesExplotacionRepository.kt`): la Tabla A del BOE indica «S29» para el ONU 3375, errata del valor oficial «S9» (el capítulo 8.5 solo abarca S1-S24). La consulta la interpreta como S9 y muestra una nota en el modal.
+
 ### Regenerar la base
 
 ```bash
@@ -40,6 +48,7 @@ python create_adr_db.py
 
 pip install pypdf
 python create_adr_packaging_db.py
+python create_adr_exploitation_db.py
 ```
 
 ## Consulta de códigos ONU
