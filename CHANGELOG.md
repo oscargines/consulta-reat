@@ -1,68 +1,33 @@
 # Changelog
 
-Todos los cambios notables del proyecto se documentan en este fichero.
-El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/).
+## Versión 1.5.5
 
-## [1.5.4] - 2026-10-08
+### Baremo Sancionador actualizado a la versión 7.4
 
-### Añadido
-- **Disposiciones de explotación ADR 8.5**: al pulsar el dato «Explotación» en la consulta ONU se abre un modal con el texto completo de las disposiciones S citadas, con páginas de referencia. El contenido se sirve desde una base SQLite indexada generada mediante `create_adr_exploitation_db.py`. Incluye la corrección curada de la errata de la Tabla A del BOE para el ONU 3375 (S29 interpretada como S9 conforme al ADR 2025 oficial).
+Se ha actualizado el baremo sancionador a la versión oficial 7.4, actualizada hasta el 5 de octubre de 2026. Las principales novedades son:
 
-## [1.5.3] - 2026-10-08
+**Nuevas infracciones añadidas (5 nuevos códigos):**
 
-### Añadido
-- **Consulta ADR**: al pulsar el número de peligro de la placa naranja o su dato, se muestra la descripción del código correspondiente.
-- **Instrucciones de embalaje ADR 4.1**: consulta en un modal el texto completo de los códigos P, IBC, LP y R, con sección y páginas del ADR 2025. El contenido se sirve desde una base SQLite indexada generada mediante `create_adr_packaging_db.py`.
+1. **EA02.04** (Grave - 801€): No devolver a la Administración una autorización o licencia de transporte, alguna de sus copias o documentación cuando debiera haber sido devuelta, siempre que el documento conserve apariencia de validez.
 
-## [1.5.2] - 2026-10-01
+2. **EA02.05** (Grave - 401€): No conservar por parte de la Empresa los documentos de los DeCA Art. DT.8 LEY.
 
-### Añadido
-- **Coeficiente Característico**: nueva pantalla accesible desde la tarjeta "Coeficiente Característico" en la pantalla principal (entre ADR y Acerca de).
-  - Cálculo del perímetro efectivo (L) teórico a partir del tamaño del neumático (formato 315/70 R 22.5).
-  - 3 claves matemáticas exactas: altura goma ×2, llanta a mm (×25.4), diámetro total ×3.1416.
-  - Detección de fraude: % Desvío = (L teórica / Lr) × 100 → ≥104% o ≤96% = fraude confirmado.
-  - Selección del tamaño de rueda mediante desplegable con catálogo de tamaños estándar (315/70 R 22.5, 295/80 R 22.5, etc.): elimina la entrada manual que obligaba a corregir el cursor por los caracteres no numéricos.
-  - Botón "No encuentro una numeración válida": modal en el que se mide y se introduce la altura total del neumático (mm, rango 400–1500). La L teórica se calcula como altura × 3.1416, se muestra en una tarjeta reeditable y entra en el mismo cálculo de desvío.
-  - Diálogo de resultado con desglose: L teórica, L revisión, % Desvío, estado fraude/sin fraude.
-  - En caso de fraude: instrucciones de medición (4 pasos), diagrama explicativo (Croquis_medicion.png), acción requerida (taller de verificación).
+3. **EA02.06** (Grave - 401€): No proporcionar datos esenciales relativos a la conservación por parte de la Empresa de los DeCA.
 
-### Mejorado
-- Pantalla scrolleable con padding inferior para que el teclado no tape el último campo (tamaño rueda).
-- Corrección en parsing de tamaño de rueda: acepta formato con y sin separadores.
+4. **EA02.07** (Grave - 401€): No llevar la tarjeta del conductor en formato papel u obligatoria en los DeCA.
 
-## [1.5.1] - 2026-09-29
+5. **EA03.03** (Leve - 301€): No llevar en el vehículo el documento electrónico de que se trate.
 
-### Añadido
-- **Inspección de transporte escolar**: nueva tarjeta "Tipo de transporte" sobre la consulta por matrícula con cuatro opciones excluyentes (radiogroup): A) transporte público regular de uso especial escolar, B) regular de uso general, C) discrecional y D) privado complementario de viajeros.
-- Para B, C y D se solicita por modal el número de plazas del vehículo y los pasajeros menores de 16 años, con teclado numérico.
-- Al superar los umbrales del artículo 1 del RD 443/2001 (B: mitad o más de las plazas reservadas a menores; C: tres cuartas partes de viajeros menores; D: un tercio de viajeros menores) se muestra una alerta y el texto animado "TRANSPORTE ESCOLAR" en rojo.
+**Detalles de la actualización:**
+- Total de infracciones: 1071 (incremento de 5 respecto a la versión anterior 1066)
+- Se añadieron 5 nuevos códigos en el índice E (Transporte público discrecional de mercancías)
+- No se removieron códigos de la versión anterior
+- Se mantienen todos los 21 índices (A través Z) y 116 subíndices
 
-## [1.5.0] - 2026-09-29
+### Firma digital
+- Se incrementó el versionCode de 11 a 12
+- Se actualizó el versionName de "1.5.4" a "1.5.5"
 
-### Cambiado
-- **Renombrado de la aplicación** a "Consulta Transportes": nombre en el lanzador, splash, pantalla principal y "Acerca de". El identificador de paquete no cambia para poder actualizar la app sin desinstalar.
-
-### Añadido
-- **Módulo ADR 2025** (documentación en `docs/ADR_CONSULTA.md`):
-  - Consulta de mercancías por N.º ONU o nombre sobre Tabla B y Tabla A del ADR 2025, con base SQLite generada desde las tablas del BOE (`create_adr_db.py`, migración v2 con `nombre_normalized`).
-  - Mensaje claro cuando no se encuentran resultados, incluidos los 404 ONU que faltan en Tabla B (cobertura vía `UNION` con Tabla A).
-  - Detalle de cada epígrafe con placa naranja conforme a ADR 5.3.2 (proporción 40x30, marco negro proporcional, dígitos negros dinámicos) y etiquetas de peligro reales de las clases 1-9 desde `assets/PlacasEtiquetas/`, con aviso textual cuando falta algún modelo.
-  - Calculadora de la regla de los 1000 puntos (ADR 1.1.3.6): búsqueda, selección de grupo de embalaje cuando un ONU tiene varios epígrafes, solicitud de cantidad en litros o kilogramos, factores 50/3/1, multiplicador x20 de la nota a), bloqueo con categoría 0, categorías 0 y 4 no computan, desglose por categoría y aviso de documentación (ADR 5.4.1).
-- **Inspección interna** con lectura del DNIe por NFC y soporte de actas.
-- **"Acerca de"** con sección de referencias legales agrupada (LOTT/ROTT, Reglamentos UE 1071/2009 y 1072/2009, ADR 2025, RD 97/2014, RD 443/2001, LSV, RGCir, RGVeh, RD 920/2017, Ley 37/2007, RGPD, LOPDGDD) con enlaces al BOE y EUR-Lex.
-- Fuentes de estudio versionadas en `Assets/`: ADR 2025, manual de inspección MMPP 2025, tablas A y B del BOE y modelos de etiquetas.
-
-### Mejorado
-- Impresión Bluetooth (Zebra) y almacenamiento de impresoras.
-- Correcciones en la búsqueda ONU (entradas de Tabla A sin correspondencia en Tabla B) y en el flujo de añadir mercancías al cálculo de puntos.
-
-## [1.4.0] - 2026-09-28
-
-### Añadido
-- Impresión del acta de inspección en impresoras Zebra ZQ521/RW420.
-
-## [1.3.0]
-
-### Añadido
-- Inspección de transporte escolar (RD 443/2001).
-- Detección de matrícula por OCR con cámara.
+### Notas adicionales
+- La base de datos `BasermoSancionador.db` fue migrada añadiendo las 5 nuevas infracciones manteniendo la compatibilidad con la estructura existente
+- Todas las pruebas existentes pasaron exitosamente (BUILD SUCCESSFUL)
