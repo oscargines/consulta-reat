@@ -20,13 +20,12 @@ class BaremoDatabase(context: Context) : SQLiteOpenHelper(
     companion object {
         private fun databaseFile(context: Context): String {
             val file = context.getDatabasePath(DATABASE_NAME)
-            if (!file.exists()) {
-                // Se distribuye como asset para que el baremo funcione sin conexión y se
-                // copia al directorio SQLite privado de la app solo durante el primer acceso.
-                file.parentFile?.mkdirs()
-                context.assets.open(ASSET_NAME).use { input ->
-                    file.outputStream().use { output -> input.copyTo(output) }
-                }
+            // Siempre copiamos la base de datos del asset para asegurar que la versión
+            // más reciente del baremo se use en todo momento. Esto garantiza que las
+            // actualizaciones del baremo sancionador se reflejan inmediatamente.
+            file.parentFile?.mkdirs()
+            context.assets.open(ASSET_NAME).use { input ->
+                file.outputStream().use { output -> input.copyTo(output) }
             }
             return file.absolutePath
         }
