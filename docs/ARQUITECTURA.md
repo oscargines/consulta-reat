@@ -45,6 +45,7 @@ Aplicación Android nativa en **Kotlin** con **Jetpack Compose** y arquitectura 
 - **`HistorialScreen.kt`** – Lista de consultas guardadas con acceso al detalle y borrado.
 - **`BaremoScreen.kt`** – Consulta local de infracciones, con búsqueda, filtros por índice/gravedad, agrupación por subíndice y detalle normativo.
 - **`InspeccionTransEscolarScreen.kt`** – Consulta de matrícula, datos del autobús, cálculo de antigüedad al 1 de septiembre, avisos de antigüedad/autorización y checklist operativo del RD 443/2001 con modales consecutivos del codificado DGT.
+- **`CoeficienteCaracteristicoScreen.kt`** – Cálculo del coeficiente característico del tacógrafo y detección de fraude a partir de Wa/La de activación y Wp/Lp del último calibrado periódico.
 - **`AcercaDeScreen.kt`** – Información legal, versión y enlaces a las fuentes.
 
 ### 2. ViewModel (`ui/viewmodel/`)
@@ -118,6 +119,18 @@ La pantalla muestra los índices como una lista seleccionable. Los resultados se
 
 La guía de implementación y las correspondencias se documentan en [Inspección de transporte escolar](INSPECCION_TRANSPORTE_ESCOLAR.md).
 
+## Flujo del coeficiente característico
+
+1. El usuario entra desde la tarjeta **Coeficiente Característico** de la pantalla principal.
+2. Introduce los datos de la activación del tacógrafo: `Wa` y `La`.
+3. Introduce los datos del último calibrado periódico: `Wp` y `Lp`.
+4. Si `La` y `Lp` coinciden, la pantalla muestra directamente que no hay fraude.
+5. En caso contrario, se calculan `gamma = Wa × La`, `beta = Wp × Lp`, `alfa = beta − gamma` y `dseta = alfa × 100 / gamma`.
+6. Se considera fraude cuando `|dseta| > 4`; en caso contrario, el resultado es sin fraude.
+7. El resultado se muestra en una tarjeta y en un diálogo con los valores intermedios. Si hay fraude, se indica la acción requerida en taller.
+
+El detalle de la fórmula, los casos límite y los tests se documentan en [Coeficiente característico](COEFICIENTE_CARACTERISTICO.md).
+
 ## Flujo CAPTCHA (WebView)
 
 Cuando la web oficial devuelve el formulario con CAPTCHA:
@@ -136,6 +149,7 @@ Cuando la web oficial devuelve el formulario con CAPTCHA:
 | `historial` | Historial de consultas | Sí |
 | `excepciones` | Excepciones del artículo 33 ROTC | Sí |
 | `inspeccion-trans-escolar` | Inspección de transporte escolar | Sí |
+| `coeficiente-caracteristico` | Coeficiente característico y detección de fraude | Sí |
 | `baremo` | Consulta local del baremo sancionador | Sí |
 | `acercade` | Información legal y fuentes | Sí |
 
@@ -152,6 +166,7 @@ El historial se guarda con `DataStore` (Preferences) bajo el archivo `historial_
 - `app/src/test/.../RgtHtmlParserTest.kt` – parseo de HTML del REAT.
 - `app/src/test/.../ReatApiMapperTest.kt` – mapper de la respuesta NAP.
 - `app/src/test/.../BaremoRepositoryTest.kt` – búsqueda del baremo sin distinguir mayúsculas ni acentos.
+- `app/src/test/.../CoeficienteCaracteristicoTest.kt` – cálculo de gamma/beta/alfa/dseta y detección de fraude.
 - `ExampleUnitTest.kt` – test base del template.
 
 ```bash

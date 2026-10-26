@@ -19,6 +19,7 @@ La aplicación consulta los datos públicos del REAT publicados por el Ministeri
 - **Baremo sancionador** local, versión 7.3, con 1.066 infracciones, filtros por índice y gravedad, búsqueda textual y detalle normativo.
 - **Inspección de Transporte Escolar**: consulta de autobuses por matrícula, importación de datos del REAT, cálculo de antigüedad al 1 de septiembre y guía rápida del Real Decreto 443/2001.
 - **Inspección interna** con lectura del DNIe por NFC.
+- **Coeficiente Característico**: detección de fraude del tacógrafo a partir de Wa/La de activación y Wp/Lp del último calibrado periódico.
 - **Acerca de** con información legal, referencias normativas y enlaces a las fuentes de datos.
 
 ## Tecnologías
@@ -94,6 +95,7 @@ app/src/main/java/com/oscar/consultareat/
 │   ├── consulta/     # Formulario de consulta + WebView de CAPTCHA
 │   ├── resultado/    # Resultados en tarjetas con estado
 │   ├── historial/    # Historial de consultas
+│   ├── coeficiente/  # Coeficiente característico y detección de fraude
 │   ├── baremo/       # Consulta local del baremo sancionador
 │   ├── adr/          # Consulta ONU, panel naranja y 1000 puntos
 │   ├── inspeccion/    # Inspección escolar (RD 443/2001) e interna (DNIe NFC)
@@ -115,6 +117,7 @@ Las bases de datos `BasermoSancionador.db` y `adr_2025.db` se incluyen en `app/s
 - [Inspección de transporte escolar](docs/INSPECCION_TRANSPORTE_ESCOLAR.md): flujo, cálculo de antigüedad, checklist y correspondencias sancionadoras.
 - [Módulo ADR 2025](docs/ADR_CONSULTA.md): fuentes de estudio, base de datos, panel naranja, etiquetas y regla de los 1000 puntos.
 - [Historial de cambios](CHANGELOG.md).
+- [Coeficiente Característico](docs/COEFICIENTE_CARACTERISTICO.md): fórmula, criterio de fraude, caso La = Lp y tests.
 
 ## Fuentes de datos
 

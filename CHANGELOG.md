@@ -1,5 +1,52 @@
 # Changelog
 
+## Versión 1.6.2
+
+### Coeficiente característico: nuevo cálculo de fraude
+
+- El cálculo pasa a utilizar Wa y La de la activación del tacógrafo, y Wp y Lp del último calibrado periódico.
+- Se calculan gamma (Wa × La), beta (Wp × Lp), alfa (beta − gamma) y dseta (alfa × 100 / gamma).
+- Se detecta fraude cuando el valor absoluto de dseta supera el 4 %.
+- Si La y Lp coinciden, se muestra directamente ausencia de fraude.
+- Se eliminan el selector de tamaño de rueda y la medición de altura del neumático.
+
+### Firma digital
+
+- Se incrementó el versionCode de 13 a 14.
+- Se actualizó el versionName de "1.6.1" a "1.6.2".
+
+### Notas adicionales
+
+- Se añadieron tests unitarios para el nuevo cálculo del coeficiente característico.
+
+## Versión 1.6.1
+
+### Nuevo módulo de radiactivos - Clase 7
+
+Se incorpora la clasificación y señalización de bultos de materia radiactiva conforme al ADR 2025:
+
+- Búsqueda de códigos ONU de clase 7 y base local de radionúclidos (`adr_radionucleidos_2025_v2.db`).
+- Clasificación en excluido, exento, exceptuado y regulado.
+- Cálculo de categoría (I-BLANCA, II-AMARILLA y III-AMARILLA), TI y CSI/ISC.
+- Etiquetas 7A, 7B, 7C y 7E con contenido, actividad, TI y CSI/ISC pintados sobre la imagen.
+- Placa 7D del vehículo con el número UN y paneles naranja delanteros, traseros y laterales.
+- Etiquetas orientativas con guiones cuando falta la dosis o el TI, o cuando el bulto no es transportable.
+- Corrección del pintado interior de las etiquetas: texto visible, alineado con las líneas de datos y sin tapar la palabra `RADIOACTIVE` de la placa 7D.
+
+### Disposiciones especiales ADR
+
+- Nueva base `adr_disposiciones_especiales_2025.db` y consulta de las disposiciones especiales del capítulo 3.3 desde la ficha ONU.
+
+### Firma digital
+
+- Se incrementó el versionCode de 12 a 13.
+- Se actualizó el versionName de "1.5.5" a "1.6.1".
+
+### Notas adicionales
+
+- Se actualizó la documentación técnica con `docs/RADIACTIVOS_CLASE_7.md`.
+- Se añadieron tests para la clasificación de radiactivos y para las etiquetas orientativas.
+
 ## Versión 1.5.5
 
 ### Baremo Sancionador actualizado a la versión 7.4

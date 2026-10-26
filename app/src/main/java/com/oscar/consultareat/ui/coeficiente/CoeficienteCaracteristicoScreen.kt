@@ -1,8 +1,5 @@
 package com.oscar.consultareat.ui.coeficiente
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -23,52 +19,33 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Speed
-import androidx.compose.material.icons.filled.Straighten
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.oscar.consultareat.R
 import com.oscar.consultareat.ui.theme.AzulClaro
@@ -84,7 +61,6 @@ fun CoeficienteCaracteristicoScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val viewModel: CoeficienteCaracteristicoViewModel = viewModel(factory = CoeficienteCaracteristicoViewModelFactory())
 
     Scaffold(
@@ -147,175 +123,58 @@ fun CoeficienteCaracteristicoScreen(
                             fontWeight = FontWeight.Bold
                         )
 
-                        OutlinedTextField(
-                            value = viewModel.coeficienteW,
-                            onValueChange = { viewModel.onCoeficienteWChange(it) },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            label = { Text(stringResource(R.string.coeficiente_label_w)) },
-                            leadingIcon = { Icon(Icons.Filled.Calculate, contentDescription = null, tint = AzulInstitucional) },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Decimal,
-                                imeAction = ImeAction.Next
-                            ),
-                            keyboardActions = KeyboardActions(onNext = { }),
-                            shape = RoundedCornerShape(12.dp)
+                        Text(
+                            stringResource(R.string.coeficiente_grupo_activacion),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = TextoSecundario,
+                            fontWeight = FontWeight.Bold
                         )
 
-                        OutlinedTextField(
-                            value = viewModel.circunferenciaL,
-                            onValueChange = { viewModel.onCircunferenciaLChange(it) },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            label = { Text(stringResource(R.string.coeficiente_label_l)) },
-                            leadingIcon = { Icon(Icons.Filled.Speed, contentDescription = null, tint = AzulInstitucional) },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Decimal,
-                                imeAction = ImeAction.Next
-                            ),
-                            keyboardActions = KeyboardActions(onNext = { }),
-                            shape = RoundedCornerShape(12.dp)
+                        CampoCoeficiente(
+                            value = viewModel.coeficienteWa,
+                            onValueChange = { viewModel.onCoeficienteWaChange(it) },
+                            label = stringResource(R.string.coeficiente_label_wa),
+                            icon = Icons.Filled.Calculate,
+                            imeAction = ImeAction.Next
                         )
 
-                        OutlinedTextField(
-                            value = viewModel.circunferenciaLr,
-                            onValueChange = { viewModel.onCircunferenciaLrChange(it) },
-                            modifier = Modifier.fillMaxWidth(),
-                            singleLine = true,
-                            label = { Text(stringResource(R.string.coeficiente_label_lr)) },
-                            leadingIcon = { Icon(Icons.Filled.Speed, contentDescription = null, tint = AzulInstitucional) },
-                            keyboardOptions = KeyboardOptions(
-                                keyboardType = KeyboardType.Decimal,
-                                imeAction = ImeAction.Next
-                            ),
-                            keyboardActions = KeyboardActions(onNext = { }),
-                            shape = RoundedCornerShape(12.dp)
+                        CampoCoeficiente(
+                            value = viewModel.circunferenciaLa,
+                            onValueChange = { viewModel.onCircunferenciaLaChange(it) },
+                            label = stringResource(R.string.coeficiente_label_la),
+                            icon = Icons.Filled.Speed,
+                            imeAction = ImeAction.Next
                         )
-
-                        var ruedaExpanded by remember { mutableStateOf(false) }
-
-                        ExposedDropdownMenuBox(
-                            expanded = ruedaExpanded,
-                            onExpandedChange = { ruedaExpanded = it }
-                        ) {
-                            OutlinedTextField(
-                                value = viewModel.tamanoRuedaSeleccionada?.label.orEmpty(),
-                                onValueChange = {},
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable),
-                                readOnly = true,
-                                singleLine = true,
-                                label = { Text(stringResource(R.string.coeficiente_label_tamano)) },
-                                leadingIcon = { Icon(Icons.Filled.Info, contentDescription = null, tint = AzulInstitucional) },
-                                placeholder = { Text("315/70 R 22.5") },
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = ruedaExpanded) },
-                                shape = RoundedCornerShape(12.dp)
-                            )
-
-                            DropdownMenu(
-                                expanded = ruedaExpanded,
-                                onDismissRequest = { ruedaExpanded = false },
-                                modifier = Modifier.fillMaxWidth(0.9f)
-                            ) {
-                                CATALOGO_RUEDAS.forEach { opcion ->
-                                    DropdownMenuItem(
-                                        text = { Text(opcion.label) },
-                                        onClick = {
-                                            viewModel.onTamanoRuedaSeleccionada(opcion)
-                                            ruedaExpanded = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
 
                         Text(
-                            text = stringResource(R.string.coeficiente_formato_ayuda),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = TextoSecundario
+                            stringResource(R.string.coeficiente_grupo_periodico),
+                            style = MaterialTheme.typography.titleSmall,
+                            color = TextoSecundario,
+                            fontWeight = FontWeight.Bold
                         )
 
-                        val alturaConfirmada = viewModel.alturaConfirmadaMm
-                        if (alturaConfirmada != null) {
-                            Card(
-                                shape = RoundedCornerShape(12.dp),
-                                colors = CardDefaults.cardColors(containerColor = AzulClaro),
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 12.dp, vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Icon(
-                                        Icons.Filled.Straighten,
-                                        contentDescription = null,
-                                        tint = AzulInstitucional,
-                                        modifier = Modifier.size(22.dp)
-                                    )
-                                    Column(Modifier.weight(1f)) {
-                                        Text(
-                                            text = stringResource(R.string.coeficiente_altura_medida, alturaConfirmada),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = FontWeight.Bold,
-                                            color = AzulInstitucional
-                                        )
-                                        Text(
-                                            text = stringResource(
-                                                R.string.coeficiente_altura_lt_preview,
-                                                viewModel.lTeoricaPorAltura() ?: 0.0
-                                            ),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = TextoSecundario
-                                        )
-                                    }
-                                    IconButton(onClick = { viewModel.limpiarAltura() }) {
-                                        Icon(
-                                            Icons.Filled.Close,
-                                            contentDescription = stringResource(R.string.coeficiente_altura_quitar)
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        CampoCoeficiente(
+                            value = viewModel.coeficienteWp,
+                            onValueChange = { viewModel.onCoeficienteWpChange(it) },
+                            label = stringResource(R.string.coeficiente_label_wp),
+                            icon = Icons.Filled.Calculate,
+                            imeAction = ImeAction.Next
+                        )
 
-                        OutlinedButton(
-                            onClick = { viewModel.abrirDialogoAltura() },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Icon(
-                                Icons.Filled.Straighten,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp),
-                                tint = AzulInstitucional
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(stringResource(R.string.coeficiente_btn_no_encuentro))
-                        }
+                        CampoCoeficiente(
+                            value = viewModel.circunferenciaLp,
+                            onValueChange = { viewModel.onCircunferenciaLpChange(it) },
+                            label = stringResource(R.string.coeficiente_label_lp),
+                            icon = Icons.Filled.Speed,
+                            imeAction = ImeAction.Done
+                        )
 
                         Button(
                             onClick = { viewModel.calculate() },
-                            enabled = viewModel.isFormValid && !viewModel.isCalculating,
+                            enabled = viewModel.isFormValid,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            if (viewModel.isCalculating) {
-                                androidx.compose.material3.CircularProgressIndicator(
-                                    modifier = Modifier.size(22.dp),
-                                    color = MaterialTheme.colorScheme.onPrimary,
-                                    strokeWidth = 2.dp
-                                )
-                            } else {
-                                Text(stringResource(R.string.coeficiente_btn_calcular))
-                            }
-                        }
-
-                        if (viewModel.isCalculating) {
-                            androidx.compose.material3.LinearProgressIndicator(
-                                modifier = Modifier.fillMaxWidth()
-                            )
+                            Text(stringResource(R.string.coeficiente_btn_calcular))
                         }
                     }
                 }
@@ -328,27 +187,39 @@ fun CoeficienteCaracteristicoScreen(
             }
         }
 
-        // Diálogo de resultado
         if (viewModel.showResultDialog) {
-                viewModel.calculationResult?.let { result ->
-                    ResultDialog(
-                        result = result,
-                        onDismiss = { viewModel.dismissResultDialog() }
-                    )
-                }
+            viewModel.calculationResult?.let { result ->
+                ResultDialog(
+                    result = result,
+                    onDismiss = { viewModel.dismissResultDialog() }
+                )
             }
-
-        // Diálogo de medida de altura del neumático
-        if (viewModel.showAlturaDialog) {
-            AlturaNeumaticoDialog(
-                valor = viewModel.alturaNeumatico,
-                error = viewModel.alturaError,
-                onValorChange = { viewModel.onAlturaChange(it) },
-                onConfirmar = { viewModel.confirmarAltura() },
-                onCancelar = { viewModel.cancelarDialogoAltura() }
-            )
         }
     }
+}
+
+@Composable
+private fun CampoCoeficiente(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    icon: ImageVector,
+    imeAction: ImeAction
+) {
+    OutlinedTextField(
+        value = value,
+        onValueChange = onValueChange,
+        modifier = Modifier.fillMaxWidth(),
+        singleLine = true,
+        label = { Text(label) },
+        leadingIcon = { Icon(icon, contentDescription = null, tint = AzulInstitucional) },
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Decimal,
+            imeAction = imeAction
+        ),
+        keyboardActions = KeyboardActions(onNext = { }),
+        shape = RoundedCornerShape(12.dp)
+    )
 }
 
 @Composable
@@ -407,49 +278,26 @@ private fun ResultCard(result: CalculationResult) {
                 )
             }
             Spacer(Modifier.height(16.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                ResultadoItem(
-                    label = stringResource(R.string.coeficiente_l_teorica),
-                    value = "%.1f mm".format(result.lTeorica),
-                    color = AzulInstitucional
+
+            if (result.circunferenciasIguales) {
+                Text(
+                    stringResource(R.string.coeficiente_sin_fraude_l_igual),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = TextoSecundario,
+                    textAlign = TextAlign.Center
                 )
-                ResultadoItem(
-                    label = stringResource(R.string.coeficiente_l_revision),
-                    value = "%.1f mm".format(result.lRevision),
-                    color = TextoSecundario
+            } else {
+                ResultadoFila(stringResource(R.string.coeficiente_gamma), "%.2f".format(result.gamma))
+                ResultadoFila(stringResource(R.string.coeficiente_beta), "%.2f".format(result.beta))
+                ResultadoFila(stringResource(R.string.coeficiente_alfa), "%.2f".format(result.alfa))
+                ResultadoFila(
+                    stringResource(R.string.coeficiente_dseta),
+                    "%.2f%%".format(result.dseta),
+                    isHighlighted = true,
+                    color = colorEstado
                 )
             }
-            Spacer(Modifier.height(12.dp))
-            ResultadoItem(
-                label = stringResource(R.string.coeficiente_porcentaje_desvio),
-                value = "%.2f%%".format(result.porcentajeDesvio),
-                color = colorEstado,
-                isHighlighted = true
-            )
         }
-    }
-}
-
-@Composable
-private fun ResultadoItem(
-    label: String,
-    value: String,
-    color: Color,
-    isHighlighted: Boolean = false
-) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(label, style = MaterialTheme.typography.labelMedium, color = TextoSecundario)
-        Spacer(Modifier.height(4.dp))
-        Text(
-            value,
-            style = if (isHighlighted) MaterialTheme.typography.headlineMedium else MaterialTheme.typography.titleLarge,
-            fontWeight = if (isHighlighted) FontWeight.Bold else FontWeight.Normal,
-            color = color
-        )
     }
 }
 
@@ -482,7 +330,6 @@ private fun ResultDialog(
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                // Resumen de resultados
                 Card(
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
@@ -497,97 +344,53 @@ private fun ResultDialog(
                             fontWeight = FontWeight.Bold,
                             color = colorEstado
                         )
-                        ResultadoFila(stringResource(R.string.coeficiente_l_teorica), "%.1f mm".format(result.lTeorica))
-                        ResultadoFila(stringResource(R.string.coeficiente_l_revision), "%.1f mm".format(result.lRevision))
-                        ResultadoFila(
-                            stringResource(R.string.coeficiente_porcentaje_desvio),
-                            "%.2f%%".format(result.porcentajeDesvio),
-                            isHighlighted = true,
-                            color = colorEstado
-                        )
+                        if (result.circunferenciasIguales) {
+                            Text(
+                                stringResource(R.string.coeficiente_sin_fraude_l_igual),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = TextoSecundario
+                            )
+                        } else {
+                            ResultadoFila(stringResource(R.string.coeficiente_gamma), "%.2f".format(result.gamma))
+                            ResultadoFila(stringResource(R.string.coeficiente_beta), "%.2f".format(result.beta))
+                            ResultadoFila(stringResource(R.string.coeficiente_alfa), "%.2f".format(result.alfa))
+                            ResultadoFila(
+                                stringResource(R.string.coeficiente_dseta),
+                                "%.2f%%".format(result.dseta),
+                                isHighlighted = true,
+                                color = colorEstado
+                            )
+                        }
                     }
                 }
 
                 if (hayFraude) {
-                    // Instrucciones de medición
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(
-                            stringResource(R.string.coeficiente_como_medir_titulo),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        
-                        Card(
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFF8E1)),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(Icons.Filled.Warning, contentDescription = "", tint = RojoEstado, modifier = Modifier.size(24.dp))
                                 Text(
-                                    stringResource(R.string.coeficiente_como_medir_paso1),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                Text(
-                                    stringResource(R.string.coeficiente_como_medir_paso2),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                Text(
-                                    stringResource(R.string.coeficiente_como_medir_paso3),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                Text(
-                                    stringResource(R.string.coeficiente_como_medir_paso4),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        }
-
-                        // Diagrama de medición
-                        Card(
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            androidx.compose.foundation.Image(
-                                painter = painterResource(id = R.drawable.croquis_medicion),
-                                contentDescription = stringResource(R.string.coeficiente_diagrama_medicion),
-                                contentScale = ContentScale.Fit,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(300.dp)
-                                    .padding(16.dp)
-                            )
-                        }
-
-                        // Acción recomendada
-                        Card(
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color(0xFFFFEBEE)),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Icon(Icons.Filled.Warning, contentDescription = "", tint = RojoEstado, modifier = Modifier.size(24.dp))
-                                    Text(
-                                        stringResource(R.string.coeficiente_accion_requerida_titulo),
-                                        style = MaterialTheme.typography.titleSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = RojoEstado
-                                    )
-                                }
-                                Text(
-                                    stringResource(R.string.coeficiente_accion_requerida_texto),
-                                    style = MaterialTheme.typography.bodyMedium,
+                                    stringResource(R.string.coeficiente_accion_requerida_titulo),
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
                                     color = RojoEstado
                                 )
                             }
+                            Text(
+                                stringResource(R.string.coeficiente_accion_requerida_texto),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = RojoEstado
+                            )
                         }
                     }
-                } else {
+                } else if (!result.circunferenciasIguales) {
                     Text(
                         stringResource(R.string.coeficiente_sin_fraude_mensaje),
                         style = MaterialTheme.typography.bodyMedium,
@@ -606,7 +409,12 @@ private fun ResultDialog(
 }
 
 @Composable
-private fun ResultadoFila(label: String, value: String, isHighlighted: Boolean = false, color: Color = MaterialTheme.colorScheme.onSurface) {
+private fun ResultadoFila(
+    label: String,
+    value: String,
+    isHighlighted: Boolean = false,
+    color: Color = MaterialTheme.colorScheme.onSurface
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
@@ -619,76 +427,4 @@ private fun ResultadoFila(label: String, value: String, isHighlighted: Boolean =
             color = if (isHighlighted) color else MaterialTheme.colorScheme.onSurface
         )
     }
-}
-
-@Composable
-private fun AlturaNeumaticoDialog(
-    valor: String,
-    error: String?,
-    onValorChange: (String) -> Unit,
-    onConfirmar: () -> Unit,
-    onCancelar: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onCancelar,
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(bottom = 8.dp)
-            ) {
-                Icon(
-                    Icons.Filled.Straighten,
-                    contentDescription = null,
-                    tint = AzulInstitucional,
-                    modifier = Modifier.size(26.dp)
-                )
-                Text(
-                    stringResource(R.string.coeficiente_altura_titulo),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = AzulInstitucional
-                )
-            }
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    stringResource(R.string.coeficiente_altura_mensaje),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = TextoSecundario
-                )
-                OutlinedTextField(
-                    value = valor,
-                    onValueChange = onValorChange,
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    label = { Text(stringResource(R.string.coeficiente_altura_label)) },
-                    placeholder = { Text(stringResource(R.string.coeficiente_altura_placeholder)) },
-                    isError = error != null,
-                    supportingText = {
-                        if (error != null) {
-                            Text(error)
-                        }
-                    },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Decimal,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(onDone = { onConfirmar() }),
-                    shape = RoundedCornerShape(12.dp)
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onConfirmar) {
-                Text(stringResource(R.string.coeficiente_altura_guardar))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onCancelar) {
-                Text(stringResource(R.string.cancel_action))
-            }
-        }
-    )
 }
