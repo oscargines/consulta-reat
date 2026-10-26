@@ -1,65 +1,81 @@
 package com.oscar.consultareat
 
+import com.oscar.consultareat.ui.coeficiente.EstadoCoeficiente
+import com.oscar.consultareat.ui.coeficiente.MetodoCalculo
 import com.oscar.consultareat.ui.coeficiente.calcularResultado
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CoeficienteCaracteristicoTest {
 
     @Test
-    fun `circunferencias iguales no calculan valores y no hay fraude`() {
-        val resultado = calcularResultado(wa = 1000.0, la = 3000.0, wp = 1100.0, lp = 3000.0)
+    fun `misma L usa el metodo A de W constante`() {
+        val resultado = calcularResultado(wa = 7660.0, la = 2929.0, wp = 7950.0, lp = 2929.0)
 
-        assertTrue(resultado.circunferenciasIguales)
-        assertFalse(resultado.hayFraude)
+        assertEquals(MetodoCalculo.W_CONSTANTE, resultado.metodo)
+        assertEquals(290.0, resultado.diferenciaW!!, 0.0001)
+        assertEquals(3.7859, resultado.z, 0.0001)
+        assertEquals(EstadoCoeficiente.DENTRO_DE_PARAMETROS, resultado.estado)
         assertNull(resultado.gamma)
         assertNull(resultado.beta)
         assertNull(resultado.alfa)
-        assertNull(resultado.dseta)
     }
 
     @Test
-    fun `calcula gamma beta alfa y dseta`() {
+    fun `metodo A por encima del cuatro por ciento es indicio`() {
+        val resultado = calcularResultado(wa = 7630.0, la = 2929.0, wp = 7950.0, lp = 2929.0)
+
+        assertEquals(320.0, resultado.diferenciaW!!, 0.0001)
+        assertEquals(4.194, resultado.z, 0.0001)
+        assertEquals(EstadoCoeficiente.INDICIO_MANIPULACION, resultado.estado)
+    }
+
+    @Test
+    fun `L distinta usa el metodo B de neumaticos`() {
+        val resultado = calcularResultado(wa = 7630.0, la = 2929.0, wp = 7650.0, lp = 3000.0)
+
+        assertEquals(MetodoCalculo.NEUMATICOS, resultado.metodo)
+        assertEquals(22_348_270.0, resultado.gamma!!, 0.0001)
+        assertEquals(22_950_000.0, resultado.beta!!, 0.0001)
+        assertEquals(601_730.0, resultado.alfa!!, 0.0001)
+        assertEquals(2.6925, resultado.z, 0.0001)
+        assertEquals(EstadoCoeficiente.DENTRO_DE_PARAMETROS, resultado.estado)
+        assertNull(resultado.diferenciaW)
+    }
+
+    @Test
+    fun `metodo B por encima del cuatro por ciento es indicio`() {
+        val resultado = calcularResultado(wa = 7630.0, la = 2929.0, wp = 7650.0, lp = 3050.0)
+
+        assertEquals(23_332_500.0, resultado.beta!!, 0.0001)
+        assertEquals(984_230.0, resultado.alfa!!, 0.0001)
+        assertEquals(4.4040, resultado.z, 0.0001)
+        assertEquals(EstadoCoeficiente.INDICIO_MANIPULACION, resultado.estado)
+    }
+
+    @Test
+    fun `Z exactamente cuatro queda dentro de parametros`() {
         val resultado = calcularResultado(wa = 1000.0, la = 3000.0, wp = 1000.0, lp = 3120.0)
 
-        assertEquals(3_000_000.0, resultado.gamma!!, 0.0001)
-        assertEquals(3_120_000.0, resultado.beta!!, 0.0001)
-        assertEquals(120_000.0, resultado.alfa!!, 0.0001)
-        assertEquals(4.0, resultado.dseta!!, 0.0001)
+        assertEquals(4.0, resultado.z, 0.0001)
+        assertEquals(EstadoCoeficiente.DENTRO_DE_PARAMETROS, resultado.estado)
     }
 
     @Test
-    fun `dseta exactamente cuatro no es fraude`() {
-        val resultado = calcularResultado(wa = 1000.0, la = 3000.0, wp = 1000.0, lp = 3120.0)
-
-        assertEquals(4.0, resultado.dseta!!, 0.0001)
-        assertFalse(resultado.hayFraude)
-    }
-
-    @Test
-    fun `dseta superior a cuatro es fraude`() {
-        val resultado = calcularResultado(wa = 1000.0, la = 3000.0, wp = 1000.0, lp = 3130.0)
-
-        assertEquals(4.3333, resultado.dseta!!, 0.0001)
-        assertTrue(resultado.hayFraude)
-    }
-
-    @Test
-    fun `dseta negativa superior a cuatro en valor absoluto es fraude`() {
+    fun `Z negativa superior a cuatro en valor absoluto es indicio`() {
         val resultado = calcularResultado(wa = 1000.0, la = 3000.0, wp = 1000.0, lp = 2870.0)
 
-        assertEquals(-4.3333, resultado.dseta!!, 0.0001)
-        assertTrue(resultado.hayFraude)
+        assertEquals(-4.3333, resultado.z, 0.0001)
+        assertEquals(EstadoCoeficiente.INDICIO_MANIPULACION, resultado.estado)
     }
 
     @Test
-    fun `dseta negativa dentro del margen no es fraude`() {
-        val resultado = calcularResultado(wa = 1000.0, la = 3000.0, wp = 1000.0, lp = 2950.0)
+    fun `metodo A con W inferior tambien es indicio si supera el cuatro por ciento`() {
+        val resultado = calcularResultado(wa = 1000.0, la = 3000.0, wp = 950.0, lp = 3000.0)
 
-        assertEquals(-1.6667, resultado.dseta!!, 0.0001)
-        assertFalse(resultado.hayFraude)
+        assertEquals(-50.0, resultado.diferenciaW!!, 0.0001)
+        assertEquals(-5.0, resultado.z, 0.0001)
+        assertEquals(EstadoCoeficiente.INDICIO_MANIPULACION, resultado.estado)
     }
 }

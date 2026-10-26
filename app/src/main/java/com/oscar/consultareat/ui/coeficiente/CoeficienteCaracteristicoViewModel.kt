@@ -7,42 +7,67 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import kotlin.math.abs
 
+enum class MetodoCalculo {
+    W_CONSTANTE,
+    NEUMATICOS
+}
+
+enum class EstadoCoeficiente {
+    DENTRO_DE_PARAMETROS,
+    INDICIO_MANIPULACION
+}
+
 data class CalculationResult(
+    val metodo: MetodoCalculo,
+    val diferenciaW: Double?,
     val gamma: Double?,
     val beta: Double?,
     val alfa: Double?,
-    val dseta: Double?,
-    val hayFraude: Boolean,
-    val circunferenciasIguales: Boolean
+    val z: Double,
+    val estado: EstadoCoeficiente
 )
 
 private const val TOLERANCIA_L = 1e-6
-private const val UMBRAL_DSETA = 4.0
+private const val UMBRAL_MANIPULACION = 4.0
 
 fun calcularResultado(wa: Double, la: Double, wp: Double, lp: Double): CalculationResult {
-    if (abs(la - lp) < TOLERANCIA_L) {
+    val mismaL = abs(la - lp) < TOLERANCIA_L
+
+    if (mismaL) {
+        val diferenciaW = wp - wa
+        val z = (diferenciaW * 100.0) / wa
         return CalculationResult(
+            metodo = MetodoCalculo.W_CONSTANTE,
+            diferenciaW = diferenciaW,
             gamma = null,
             beta = null,
             alfa = null,
-            dseta = null,
-            hayFraude = false,
-            circunferenciasIguales = true
+            z = z,
+            estado = if (abs(z) > UMBRAL_MANIPULACION) {
+                EstadoCoeficiente.INDICIO_MANIPULACION
+            } else {
+                EstadoCoeficiente.DENTRO_DE_PARAMETROS
+            }
         )
     }
 
     val gamma = wa * la
     val beta = wp * lp
     val alfa = beta - gamma
-    val dseta = (alfa * 100.0) / gamma
+    val z = (alfa * 100.0) / gamma
 
     return CalculationResult(
+        metodo = MetodoCalculo.NEUMATICOS,
+        diferenciaW = null,
         gamma = gamma,
         beta = beta,
         alfa = alfa,
-        dseta = dseta,
-        hayFraude = abs(dseta) > UMBRAL_DSETA,
-        circunferenciasIguales = false
+        z = z,
+        estado = if (abs(z) > UMBRAL_MANIPULACION) {
+            EstadoCoeficiente.INDICIO_MANIPULACION
+        } else {
+            EstadoCoeficiente.DENTRO_DE_PARAMETROS
+        }
     )
 }
 

@@ -78,7 +78,7 @@
     <!-- Coeficiente Característico Strings -->
     <string name="coeficiente_titulo">Coeficiente Característico</string>
     <string name="coeficiente_titulo_cabecera">Coeficiente Característico</string>
-    <string name="coeficiente_subtitulo_cabecera">Cálculo del coeficiente característico y detección de fraude en el tacógrafo</string>
+    <string name="coeficiente_subtitulo_cabecera">Detección de indicios de manipulación del tacógrafo (métodos A y B)</string>
     <string name="coeficiente_datos_entrada">Datos de entrada</string>
     <string name="coeficiente_grupo_activacion">Activación del tacógrafo</string>
     <string name="coeficiente_label_wa">Coeficiente característico (Wa) de activación</string>
@@ -87,17 +87,27 @@
     <string name="coeficiente_label_wp">Coeficiente característico (Wp) periódico</string>
     <string name="coeficiente_label_lp">Circunferencia efectiva (Lp) periódica</string>
     <string name="coeficiente_btn_calcular">Calcular</string>
-    <string name="coeficiente_gamma">Gamma (Wa × La)</string>
-    <string name="coeficiente_beta">Beta (Wp × Lp)</string>
-    <string name="coeficiente_alfa">Alfa (Beta − Gamma)</string>
-    <string name="coeficiente_dseta">Dseta (%)</string>
-    <string name="coeficiente_fraude_detectado">FRAUDE DETECTADO</string>
-    <string name="coeficiente_sin_fraude">Sin fraude detectado</string>
+    <string name="coeficiente_metodo_w_constante">Método A: W constante (misma L)</string>
+    <string name="coeficiente_metodo_neumaticos">Método B: cambio de neumáticos (W × L)</string>
+    <string name="coeficiente_diferencia_w">Y (Wp − Wa)</string>
+    <string name="coeficiente_y_producto">Y (Wa × La)</string>
+    <string name="coeficiente_beta">β (Wp × Lp)</string>
+    <string name="coeficiente_alfa">α (β − Y)</string>
+    <string name="coeficiente_z">Z (%)</string>
+    <string name="coeficiente_dentro_parametros">Dentro de los parámetros establecidos</string>
+    <string name="coeficiente_indicio_manipulacion">Indicio de manipulación</string>
     <string name="coeficiente_resultados_calculo">Resultados del cálculo</string>
     <string name="coeficiente_accion_requerida_titulo">Acción requerida</string>
-    <string name="coeficiente_accion_requerida_texto">Trasladarse a un taller de verificación para su posterior revisión y certificación.</string>
-    <string name="coeficiente_sin_fraude_mensaje">La variación del coeficiente característico está dentro del margen permitido. No se detecta irregularidad administrativa.</string>
-    <string name="coeficiente_sin_fraude_l_igual">Las circunferencias La y Lp coinciden. No hay variación que analizar: sin fraude.</string>
+    <string name="coeficiente_accion_requerida_texto">Trasladar el vehículo a un centro técnico autorizado para la prueba de determinación de errores.</string>
+    <string name="coeficiente_comprobaciones_titulo">Comprobaciones recomendadas</string>
+    <string name="coeficiente_comprobacion_precintos">Comprobar la integridad y correcta colocación de los precintos del tacógrafo.</string>
+    <string name="coeficiente_comprobacion_neumaticos">Verificar el tamaño y medir las dimensiones reales de los neumáticos.</string>
+    <string name="coeficiente_comprobacion_grupo">Confirmar si ha habido cambio de grupo o caja de cambios: en ese caso la relación W × L anterior no es válida y se requiere una nueva calibración.</string>
+    <string name="coeficiente_comprobacion_sensor">Si el tacógrafo registra descanso con el vehículo en marcha, revisar el sensor de movimiento y la posible presencia de un imán.</string>
+    <string name="coeficiente_dentro_mensaje" formatted="false">Los parámetros están dentro del umbral de referencia del 4 %. No se aprecia indicio de manipulación.</string>
+    <string name="coeficiente_indicio_mensaje" formatted="false">Un resultado superior al 4 % es un indicio, no una prueba de fraude. La denuncia corresponde al agente actuante.</string>
+    <string name="coeficiente_aviso_metodologia" formatted="false">Metodología de la Escuela de Tráfico. Un Z superior al 4 % obliga a comprobar en centro técnico; no prueba por sí solo una manipulación. Normativa de referencia: Reglamento (UE) 165/2014.</string>
+    <string name="coeficiente_aviso_grupo">Este cálculo asume que no ha habido cambio de grupo o caja de cambios y que Wp/Lp proceden de un calibrado posterior al último cambio de neumáticos. Si no es así, acuda a un centro técnico aunque el resultado esté dentro.</string>
 
     <!-- NFC Reading Strings -->
     <string name="can_dialog_title">Introduce el CAN</string>

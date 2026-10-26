@@ -2,12 +2,13 @@
 
 ## Versión 1.6.2
 
-### Coeficiente característico: nuevo cálculo de fraude
+### Coeficiente característico: detección de indicios de manipulación
 
 - El cálculo pasa a utilizar Wa y La de la activación del tacógrafo, y Wp y Lp del último calibrado periódico.
-- Se calculan gamma (Wa × La), beta (Wp × Lp), alfa (beta − gamma) y dseta (alfa × 100 / gamma).
-- Se detecta fraude cuando el valor absoluto de dseta supera el 4 %.
-- Si La y Lp coinciden, se muestra directamente ausencia de fraude.
+- Si La y Lp coinciden se aplica el método A: Y = Wp − Wa y Z = Y × 100 / Wa.
+- Si La y Lp son distintas se aplica el método B: Y = Wa × La, β = Wp × Lp, α = β − Y y Z = α × 100 / Y.
+- Se considera dentro de los parámetros establecidos cuando |Z| ≤ 4 % y un indicio de manipulación cuando |Z| > 4 %.
+- El resultado se presenta como indicio, no como prueba de fraude. Se recomienda el traslado a un centro técnico para la prueba de determinación de errores y se indican comprobaciones sobre precintos, dimensiones reales del neumático, cambio de grupo y sensor de movimiento.
 - Se eliminan el selector de tamaño de rueda y la medición de altura del neumático.
 
 ### Firma digital
